@@ -6,12 +6,15 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
+import { BASE_API_URL } from "../../../../constants/ngrokRoute";
+import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import React, { useState } from "react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import CustomButton from "../../../../components/ui/customButton";
 import { router } from "expo-router";
+import { getItem } from "../../../../utils/asyncStorage";
 const AddProfilePhoto = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,10 +26,11 @@ const AddProfilePhoto = () => {
   // Function to open the image picker
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1], // square aspect ratio
       quality: 1,
+      selectionLimit: 1,
     });
 
     if (!result.canceled) {
@@ -34,36 +38,68 @@ const AddProfilePhoto = () => {
     }
   };
 
-  // Frontend Function
-  const uploadPhoto = async (file) => {
-    const formData = new FormData();
-    formData.append("photo", file);
-
-    try {
-      const response = await fetch("http://localhost:3000/api/photos/upload", {
-        method: "POST",
-      });
-
-      const result = await response.json();
-      if (response.ok) {
-        console.log("Photo uploaded successfully:", result.fileId);
-      } else {
-        console.error("Failed to upload photo:", result.error);
-      }
-    } catch (error) {
-      console.error("Error uploading photo:", error);
-    }
-  };
-
-  const submit = () => {
+  const submit = async () => {
     setIsSubmitting(true);
+    if (selectedImage) {
+      try {
+        const response = await fetch(
+          `${BASE_API_URL}/api/aws/presignedurl?filename=${selectedImage.name}&mimetype=${selectedImage.type}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        const data = await response.json();
+
+        if (data.presignedURL) {
+          try {
+            const response = await fetch(data.presignedURL, {
+              method: "PUT",
+              headers: {
+                "Content-Type": encodeURI(selectedImage.type),
+              },
+              body: selectedImage,
+            });
+
+            if (response.status == 200) {
+              const email = await getItem("email");
+              try {
+                const response = await fetch(
+                  `${BASE_API_URL}/api/aws/filekey`,
+                  {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: {
+                      key: data.key,
+                      email,
+                    },
+                  }
+                );
+                if (response.ok) {
+                  console.log("Upload Successful");
+                  router.push("./onboardingComplete");
+                }
+              } catch (error) {
+                console.error("Error uploading key");
+              }
+            } else {
+              console.log("Upload failed");
+            }
+          } catch (error) {
+            console.log("Unable to upload file", error);
+          }
+        }
+      } catch (error) {
+        console.log("Unable to get presignedURL: ", error);
+      }
+    }
     // Handle submission logic here
     // Uploading the pfp
 
     // For now, reset the submit button after 2 seconds for demonstration
-    setTimeout(() => setIsSubmitting(false), 2000);
-
-    router.push("./onboardingComplete");
+    // setTimeout(() => setIsSubmitting(false), 2000);
   };
 
   return (
@@ -96,6 +132,9 @@ const AddProfilePhoto = () => {
               className="border-[0.5px] border-solid border-[#888] rounded-md h-9 my-2"
               placeholderTextColor="#888"
               value={form.workplace}
+              onChangeText={(e) => {
+                setForm({ ...form, workplace: e });
+              }}
             />
             <TextInput
               style={styles.textarea2}
@@ -105,6 +144,9 @@ const AddProfilePhoto = () => {
               className="border-[0.5px] border-solid border-[#888] rounded-md"
               placeholderTextColor="#888"
               value={form.description}
+              onChangeText={(e) => {
+                setForm({ ...form, description: e });
+              }}
             />
           </View>
 
@@ -143,3 +185,5 @@ const styles = StyleSheet.create({
     textAlignVertical: "top", // Keeps text at the top of the textarea
   },
 });
+
+//The problem is with the presigned url, ended at checking the query parameters TODO
