@@ -8,25 +8,46 @@ import CustomButton from "../../../../components/ui/customButton";
 import { BASE_API_URL } from "../../../../constants/ngrokRoute";
 import { router } from "expo-router";
 import OTPResend from "../../../../components/ui/OTPresend";
-import { setItem } from "../../../../utils/asyncStorage";
+import { getItem, setItem } from "../../../../utils/asyncStorage";
 const Otp = () => {
   const [otpValue, setOtpValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const submit = async () => {
     setIsSubmitting(true);
+    const email = await getItem("email");
     try {
       const response = await fetch(`${BASE_API_URL}/api/auth/verifyotp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp: otpValue }),
+        body: JSON.stringify({ otp: otpValue, email }),
       });
       const data = await response.json();
+
       if (response.ok) {
         await setItem("userId", data.userId);
-        router.push("./create-username");
+        await setItem("accessToken", data.accessToken);
       } else {
         alert(data.message);
+      }
+      //Check for onboardingLevel
+
+      if (response.ok && data.level == 1) {
+        setTimeout(() => {
+          router.push("./create-username");
+        });
+      } else if (response.ok && data.level == 2) {
+        setTimeout(() => {
+          router.push("./add-socials");
+        });
+      } else if (response.ok && data.level == 3) {
+        setTimeout(() => {
+          router.push("./add-profile-photo");
+        });
+      } else if (response.ok && data.level == 4) {
+        //Need to give loginpage logic, User already exists, login
+      } else {
+        console.log(data);
       }
     } catch (e) {
       console.error("Error submitting OTP: ", e);

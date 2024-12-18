@@ -7,15 +7,16 @@ import {
   StyleSheet,
 } from "react-native";
 import { BASE_API_URL } from "../../../../constants/ngrokRoute";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import CustomButton from "../../../../components/ui/customButton";
 import { router } from "expo-router";
 import { getItem } from "../../../../utils/asyncStorage";
+
 const AddProfilePhoto = () => {
+  const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
@@ -23,84 +24,105 @@ const AddProfilePhoto = () => {
     description: "",
   });
 
+  useEffect(() => {
+    (async () => {
+      const status = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      setHasGalleryPermission(status.status === "granted");
+    })();
+  }, []);
+
   // Function to open the image picker
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1], // square aspect ratio
-      quality: 1,
+      quality: 0.5,
       selectionLimit: 1,
     });
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+    if (!result.canceled && result.assets?.length > 0) {
+      const asset = result.assets[0];
+      setSelectedImage({
+        uri: asset.uri,
+        name: asset.uri.split("/").pop(), // Extracting file name
+        type: asset.type || "image/jpeg", // Assuming JPEG if type is not provided
+      });
     }
   };
 
   const submit = async () => {
     setIsSubmitting(true);
     if (selectedImage) {
+      const accessToken = await getItem("accessToken");
+
       try {
         const response = await fetch(
           `${BASE_API_URL}/api/aws/presignedurl?filename=${selectedImage.name}&mimetype=${selectedImage.type}`,
           {
             method: "GET",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
         );
+
         const data = await response.json();
 
-        if (data.presignedURL) {
-          try {
-            const response = await fetch(data.presignedURL, {
-              method: "PUT",
-              headers: {
-                "Content-Type": encodeURI(selectedImage.type),
-              },
-              body: selectedImage,
-            });
+        if (data.presignedUrl) {
+          const uploadResponse = await fetch(data.presignedUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": selectedImage.type,
+            },
+            body: await fetch(selectedImage.uri).then((res) => res.blob()),
+          });
 
-            if (response.status == 200) {
-              const email = await getItem("email");
-              try {
-                const response = await fetch(
-                  `${BASE_API_URL}/api/aws/filekey`,
-                  {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: {
-                      key: data.key,
-                      email,
-                    },
-                  }
-                );
-                if (response.ok) {
-                  console.log("Upload Successful");
-                  router.push("./onboardingComplete");
-                }
-              } catch (error) {
-                console.error("Error uploading key");
+          if (uploadResponse.status === 200) {
+            const email = await getItem("email");
+            const keyUploadResponse = await fetch(
+              `${BASE_API_URL}/api/aws/filekey`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  key: data.key,
+                  email,
+                }),
               }
+            );
+
+            if (keyUploadResponse.ok) {
+              console.log("Upload Successful");
+              router.push("./onboardingComplete");
             } else {
-              console.log("Upload failed");
+              console.error("Error saving file key to backend.");
             }
-          } catch (error) {
-            console.log("Unable to upload file", error);
+          } else {
+            console.error("File upload failed.");
           }
         }
       } catch (error) {
-        console.log("Unable to get presignedURL: ", error);
+        console.error("Error during file upload process: ", error);
       }
+    } else {
+      console.error("No image selected.");
     }
-    // Handle submission logic here
-    // Uploading the pfp
-
-    // For now, reset the submit button after 2 seconds for demonstration
-    // setTimeout(() => setIsSubmitting(false), 2000);
+    setIsSubmitting(false);
   };
+
+  if (hasGalleryPermission === false) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-white">
+          Permission to access gallery is required.
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
@@ -117,7 +139,7 @@ const AddProfilePhoto = () => {
               <View className="w-32 h-32 bg-gray-700 rounded-full justify-center items-center overflow-hidden">
                 {selectedImage ? (
                   <Image
-                    source={{ uri: selectedImage }}
+                    source={{ uri: selectedImage.uri }}
                     className="w-full h-full rounded-full"
                     resizeMode="cover"
                   />
@@ -162,28 +184,26 @@ const AddProfilePhoto = () => {
 };
 
 export default AddProfilePhoto;
+
 const styles = StyleSheet.create({
   textarea: {
-    height: 50, // You can adjust the height as needed
+    height: 50,
     width: "100%",
     padding: 10,
-
     backgroundColor: "#222",
     color: "#fff",
     fontSize: 16,
     borderRadius: 8,
-    textAlignVertical: "top", // Keeps text at the top of the textarea
+    textAlignVertical: "top",
   },
   textarea2: {
-    height: 150, // You can adjust the height as needed
+    height: 150,
     width: "100%",
     padding: 10,
     backgroundColor: "#222",
     color: "#fff",
     fontSize: 16,
     borderRadius: 8,
-    textAlignVertical: "top", // Keeps text at the top of the textarea
+    textAlignVertical: "top",
   },
 });
-
-//The problem is with the presigned url, ended at checking the query parameters TODO

@@ -21,11 +21,7 @@ const Signup = () => {
     //get the onboarding
     try {
       //future usage
-      try {
-        await setItem("email", form.email);
-      } catch (e) {
-        console.error("Unable to store email: ", e);
-      }
+      await setItem("email", form.email);
 
       const response = await fetch(`${BASE_API_URL}/api/auth/signup`, {
         method: "POST",
@@ -33,29 +29,12 @@ const Signup = () => {
         body: JSON.stringify(form),
       });
       const data = await response.json();
-      //Check for onboardingLevel
-
-      if (response.ok && !data.level) {
+      console.log(data);
+      if (response.ok) {
         setTimeout(() => {
           router.push("./otp");
         }, 500);
         setIsSubmitting(false);
-      } else if (response.ok && data.level == 1) {
-        setTimeout(() => {
-          router.push("./create-username");
-        });
-      } else if (response.ok && data.level == 2) {
-        setTimeout(() => {
-          router.push("./add-socials");
-        });
-      } else if (response.ok && data.level == 3) {
-        setTimeout(() => {
-          router.push("./add-profile-photo");
-        });
-      } else if (response.ok && data.level == 4) {
-        //Need to give loginpage logic, User already exists, login
-      } else {
-        console.log(data);
       }
     } catch (error) {
       console.error("Error during signup:", error);
