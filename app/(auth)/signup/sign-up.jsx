@@ -28,8 +28,7 @@ const Signup = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      const data = await response.json();
-      console.log(data);
+
       if (response.ok) {
         setTimeout(() => {
           router.push("./otp");
