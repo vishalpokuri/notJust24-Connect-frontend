@@ -106,13 +106,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   selectedText: {
-    color: "#FFF",
+    color: "#000",
   },
   slider: {
     position: "absolute",
     width: "40%",
     height: "80%",
-    backgroundColor: "#00bcd4",
+    backgroundColor: "#b0f963",
     borderRadius: 15,
     zIndex: 0,
     elevation: 3,

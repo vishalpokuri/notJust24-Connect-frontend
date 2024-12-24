@@ -6,14 +6,37 @@ import FormField from "../../components/ui/formField";
 import { useState } from "react";
 import OtherLogger from "../../components/ui/otherLogger";
 import { Link, router } from "expo-router";
+import { BASE_API_URL } from "../../constants/ngrokRoute";
+import { setItem } from "../../utils/asyncStorage";
 export default function Signin() {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const submit = () => {
-    router.push("/signup/otp");
+  const submit = async () => {
+    try {
+      //future use
+      await setItem("email", form.email);
+
+      setIsSubmitting(true);
+      const response = await fetch(`${BASE_API_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (response.ok) {
+        setTimeout(() => {
+          router.push("/signup/otp");
+          setIsSubmitting(false);
+        }, 500);
+      }
+    } catch (err) {
+      console.error("Error logging in: ", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

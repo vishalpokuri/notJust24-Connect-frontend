@@ -45,9 +45,9 @@ const Otp = () => {
           router.push("./add-profile-photo");
         });
       } else if (response.ok && data.level == 4) {
-        //Need to give loginpage logic, User already exists, login
-      } else {
-        console.log(data);
+        setTimeout(() => {
+          router.replace(`/home/homePage?userId=${data.userId}`);
+        });
       }
     } catch (e) {
       console.error("Error submitting OTP: ", e);

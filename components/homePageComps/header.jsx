@@ -1,7 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
 import { TouchableOpacity } from "react-native";
-
 import { useState } from "react";
 import { Svg, Path } from "react-native-svg";
 import { router } from "expo-router";
@@ -9,53 +8,52 @@ const HomePageHeader = () => {
   const [image, setImage] = useState("");
   return (
     <View className="w-full flex-row items-center justify-between">
-      <Text className="font-bold  text-3xl text-white">Connect</Text>
-      <TouchableOpacity
-        className="w-24 h-14  rounded-full justify-center pl-2 overflow-hidden flex-row items-center"
-        style={styles.glassContainer}
-        onPress={() => {
-          router.push("./profile/");
-        }}
-      >
-        {image ? (
-          <Image
-            source={{ uri: image }}
-            className="w-full h-full rounded-full"
-            resizeMode="cover"
-          />
-        ) : (
-          <View className="text-white text-base bg-[#4b4b4b] w-10 h-10 rounded-full justify-center items-center">
-            <Text className="text-white">@</Text>
-          </View>
-        )}
-        <Hamburger />
-      </TouchableOpacity>
+      <Text className="font-bold  text-3xl text-white">Homepage</Text>
+      <View className="flex-row">
+        <TouchableOpacity
+          className="w-12 h-12 rounded-full justify-center overflow-hidden flex-row items-center mr-1"
+          style={styles.glassContainer}
+        >
+          <Svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 512 512"
+            id="bell"
+            width={20}
+            height={18}
+            fill="#ffffff"
+          >
+            <Path d="M455.973 357.336C443.559 350.167 436 336.835 436 322.5V230c0-82.238-55.152-151.593-130.485-173.101A50.47 50.47 0 0 0 306 50c0-27.614-22.386-50-50-50s-50 22.386-50 50c0 2.342.174 4.643.485 6.899C131.151 78.407 76 147.762 76 230v92.5c0 14.335-7.559 27.667-19.973 34.836-11.76 6.791-19.742 19.394-20.019 33.884C35.577 413.738 54.268 432 76.79 432H176c0 44.183 35.817 80 80 80s80-35.817 80-80h99.21c22.523 0 41.214-18.262 40.783-40.781-.278-14.489-8.26-27.093-20.02-33.883z"></Path>
+          </Svg>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="w-12 h-12  rounded-full justify-center overflow-hidden flex-row items-center"
+          style={styles.glassContainer}
+          onPress={() => {
+            router.push("./profile/");
+          }}
+        >
+          {image ? (
+            <Image
+              source={{ uri: image }}
+              className="w-full h-full rounded-full"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="text-white text-base bg-[#4b4b4b] w-12 h-12 rounded-full justify-center items-center">
+              <Text className="text-white">@</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 export default HomePageHeader;
 
-export const Hamburger = () => {
-  return (
-    <Svg
-      width="44px"
-      height="44px"
-      viewBox="0 -0.5 25 25"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <Path
-        d="M6.5 11.75C6.08579 11.75 5.75 12.0858 5.75 12.5C5.75 12.9142 6.08579 13.25 6.5 13.25V11.75ZM18.5 13.25C18.9142 13.25 19.25 12.9142 19.25 12.5C19.25 12.0858 18.9142 11.75 18.5 11.75V13.25ZM6.5 15.75C6.08579 15.75 5.75 16.0858 5.75 16.5C5.75 16.9142 6.08579 17.25 6.5 17.25V15.75ZM18.5 17.25C18.9142 17.25 19.25 16.9142 19.25 16.5C19.25 16.0858 18.9142 15.75 18.5 15.75V17.25ZM6.5 7.75C6.08579 7.75 5.75 8.08579 5.75 8.5C5.75 8.91421 6.08579 9.25 6.5 9.25V7.75ZM18.5 9.25C18.9142 9.25 19.25 8.91421 19.25 8.5C19.25 8.08579 18.9142 7.75 18.5 7.75V9.25ZM6.5 13.25H18.5V11.75H6.5V13.25ZM6.5 17.25H18.5V15.75H6.5V17.25ZM6.5 9.25H18.5V7.75H6.5V9.25Z"
-        fill="#FFFFFF"
-      />
-    </Svg>
-  );
-};
-
 const styles = StyleSheet.create({
   glassContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(76, 76, 76, 1)",
     borderRadius: 20,
     alignItems: "center",
     shadowColor: "#000",
@@ -63,6 +61,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.15)",
   },
 });

@@ -1,15 +1,46 @@
-import { View, Image, StyleSheet, Text } from "react-native";
-import React from "react";
-import images from "../../constants/images";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import QRCode from "react-native-qrcode-svg";
+import { getItem } from "../../utils/asyncStorage"; // Assuming getItem fetches data from AsyncStorage
+
 const Qr = () => {
+  const [userId, setUserId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        // Fetch the userId from AsyncStorage or another async source
+        // const fetchedUserId = await getItem("userId");
+        const fetchedUserId = "bullshit";
+        setUserId(fetchedUserId);
+      } catch (error) {
+        console.error("Error fetching userId:", error);
+      } finally {
+        setIsLoading(false); // Set loading to false once data is fetched
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
   return (
     <View style={styles.glassContainer}>
       <Text className="text-lg font-extrabold text-white absolute top-10 w-[280px] px-1 text-center">
         Display this QR code for your connections to join you 🤝
       </Text>
-      <View style={styles.imageContainer}>
-        <Image source={images.qr} style={styles.image} resizeMode="cover" />
-      </View>
+
+      {isLoading ? (
+        <View style={styles.imageContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      ) : (
+        <View style={styles.imageContainer}>
+          <View className="w-[280px] h-[280px] bg-white justify-center items-center">
+            <QRCode value={userId} size={240} />
+          </View>
+        </View>
+      )}
     </View>
   );
 };
