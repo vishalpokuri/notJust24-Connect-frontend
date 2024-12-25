@@ -1,6 +1,7 @@
 import React from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import Signin from "./signin";
 const AuthLayout = () => {
   return (
     <>

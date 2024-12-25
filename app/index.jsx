@@ -19,3 +19,5 @@ export default function Index() {
     </SafeAreaView>
   );
 }
+
+//auth/signin

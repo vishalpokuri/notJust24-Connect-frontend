@@ -1,34 +1,224 @@
+import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
   View,
   Text,
-  ScrollView,
-  StatusBar,
-  ActivityIndicator,
-  Vibration,
+  Image,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  TouchableOpacity,
 } from "react-native";
-import { useState } from "react";
-import CustomButton from "../../components/ui/customButton";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { BlurView } from "expo-blur";
 
-const ScanResultModal = () => {
+const ConnectionModal = ({ selfieUri, isVisible, onClose }) => {
+  const [isPortrait, setIsPortrait] = useState(true);
+  const fadeAnim = new Animated.Value(0);
+  const slideAnim = new Animated.Value(Dimensions.get("window").height);
+
+  useEffect(() => {
+    if (selfieUri) {
+      Image.getSize(selfieUri, (width, height) => {
+        setIsPortrait(height > width);
+      });
+    }
+  }, [selfieUri]);
+
+  useEffect(() => {
+    if (isVisible) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          tension: 50,
+          friction: 7,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: Dimensions.get("window").height,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isVisible]);
+
+  if (!isVisible) return null;
+
   return (
-    <View className=" absolute bg-slate-500 w-[90%] h-[40%] items-center justify-center rounded-lg">
-      <View className="justify-center items-center  mx-auto z-10">
-        <Text className="text-white">You're connecting with Me</Text>
-        <View className="mt-4 flex-row">
-          <View className="rounded-full bg-slate-300 w-16 h-16 ">
-            {/* Filling the TODOimage with the connection backend request */}
+    <View style={styles.wrapper}>
+      {/* This is the key change - BlurView as a separate full-screen layer */}
+      <BlurView
+        intensity={70}
+        tint="dark"
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      <Animated.View
+        style={[
+          styles.container,
+          {
+            opacity: fadeAnim,
+          },
+        ]}
+      >
+        {/* Modal Content */}
+        <Animated.View
+          style={[
+            styles.modalContent,
+            {
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
+          <Text style={styles.title}>New Connection Request</Text>
+          {/* Selfie Section */}
+
+          {/* Profile Section */}
+          {selfieUri && (
+            <View
+              style={[
+                styles.selfieContainer,
+                isPortrait ? styles.portraitImage : styles.landscapeImage,
+              ]}
+            >
+              <Image
+                source={{ uri: selfieUri }}
+                style={styles.selfieImage}
+                resizeMode="cover"
+              />
+            </View>
+          )}
+
+          {/* Profile Details */}
+          <View style={styles.profileContainer}>
+            <View style={styles.profilePicture}>
+              <Image
+                source={{ uri: "https://via.placeholder.com/100" }}
+                style={styles.profileImage}
+                resizeMode="cover"
+              />
+            </View>
+
+            <View style={styles.profileInfo}>
+              <Text style={styles.name}>Person Name</Text>
+              <Text style={styles.company}>Company Name</Text>
+            </View>
           </View>
-          <View className="flex-col">
-            <Text>Person name</Text>
-            <Text>Company</Text>
-          </View>
-        </View>
-      </View>
+
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
     </View>
   );
 };
 
-export default ScanResultModal;
+const styles = StyleSheet.create({
+  wrapper: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    width: "90%",
+    maxWidth: 400,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#333",
+  },
+  selfieContainer: {
+    width: "100%",
+    marginBottom: 20,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  portraitImage: {
+    height: 300,
+  },
+  landscapeImage: {
+    height: 200,
+  },
+  selfieImage: {
+    width: "100%",
+    height: "100%",
+  },
+  profileContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+  profilePicture: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: "hidden",
+    marginRight: 15,
+  },
+  profileImage: {
+    width: "100%",
+    height: "100%",
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  name: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  company: {
+    fontSize: 16,
+    color: "#666",
+    marginTop: 4,
+  },
+  closeButton: {
+    backgroundColor: "#007AFF",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
+
+export default ConnectionModal;

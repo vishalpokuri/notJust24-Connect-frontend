@@ -14,7 +14,7 @@ import ToggleButton from "../../components/homePageComps/toggleButton";
 import Qr from "../../components/homePageComps/Qr";
 import Nfc from "../../components/homePageComps/Nfc";
 import HomePageHeader from "../../components/homePageComps/header";
-
+import ScanResultModal from "../../components/modal/scanResultmodal";
 const HomePage = () => {
   const [isQRmode, setIsQRmode] = useState(true);
   const router = useRouter(); // Use the hook here
@@ -26,6 +26,7 @@ const HomePage = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScanResultModal isVisible={true} />
         <View style={styles.contentWrapper}>
           <HomePageHeader />
           <View style={styles.spacer} />
@@ -54,8 +55,8 @@ const HomePage = () => {
             </Svg>
           </TouchableOpacity>
         </View>
-        {/* <ScanResultModal /> */}
       </ScrollView>
+
       <StatusBar backgroundColor="#0a0a0a" barStyle="light-content" />
     </SafeAreaView>
   );
