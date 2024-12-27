@@ -4,25 +4,30 @@ import {
   Text,
   Image,
   Animated,
-  Dimensions,
   StyleSheet,
   TouchableOpacity,
+  Modal, // Added Modal component
 } from "react-native";
+import { getItem } from "../../utils/asyncStorage";
+import { deleteIndieNotificationInbox } from "native-notify";
 import { BlurView } from "expo-blur";
 
-const ScanResultModal = ({ selfieUri, isVisible, onClose }) => {
-  const [isPortrait, setIsPortrait] = useState(true);
+const ScanResultModal = ({
+  selfieUri,
+  isVisible,
+  onClose,
+  profileUri,
+  notificationId,
+}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const fadeAnim = new Animated.Value(0);
-  const slideAnim = new Animated.Value(Dimensions.get("window").height);
 
   useEffect(() => {
     if (selfieUri) {
-      setImageLoaded(false); // Reset when new image is provided
+      setImageLoaded(false);
       Image.getSize(
         selfieUri,
         (width, height) => {
-          setIsPortrait(height > width);
           setImageLoaded(true);
         },
         (error) => {
@@ -34,124 +39,131 @@ const ScanResultModal = ({ selfieUri, isVisible, onClose }) => {
   }, [selfieUri]);
 
   useEffect(() => {
-    // Only animate if both image is loaded and modal should be visible
     if (isVisible && imageLoaded) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     } else {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: Dimensions.get("window").height,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
   }, [isVisible, imageLoaded]);
 
-  // Don't render anything if modal shouldn't be visible or image isn't loaded
   if (!isVisible || !imageLoaded) {
     return null;
   }
 
   return (
-    <View style={styles.wrapper}>
-      {/* This is the key change - BlurView as a separate full-screen layer */}
-      <BlurView
-        intensity={70}
-        tint="dark"
-        style={StyleSheet.absoluteFillObject}
-      />
-
-      <Animated.View
-        style={[
-          styles.container,
-          {
-            opacity: fadeAnim,
-          },
-        ]}
-      >
-        {/* Modal Content */}
+    <Modal
+      visible={isVisible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <BlurView
+          intensity={70}
+          tint="dark"
+          style={StyleSheet.absoluteFillObject}
+        />
         <Animated.View
           style={[
-            styles.modalContent,
+            styles.container,
             {
-              transform: [{ translateY: slideAnim }],
+              opacity: fadeAnim,
             },
           ]}
         >
-          <Text style={styles.title}>New Connection Request</Text>
-          {/* Selfie Section */}
+          <View style={styles.modalContent}>
+            <Text style={styles.title}>New Connection Request</Text>
 
-          {selfieUri && (
-            <View
-              style={[
-                styles.selfieContainer,
-                isPortrait ? styles.portraitImage : styles.landscapeImage,
-              ]}
-            >
-              <Image
-                source={{ uri: selfieUri }}
-                style={styles.selfieImage}
-                resizeMode="cover"
-              />
+            {selfieUri && (
+              <View
+                style={[
+                  styles.selfieContainer,
+                  selfieUri.includes("portrait")
+                    ? styles.portraitImage
+                    : styles.landscapeImage,
+                ]}
+              >
+                <Image
+                  source={{ uri: selfieUri }}
+                  style={styles.selfieImage}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+
+            <View style={styles.profileContainer}>
+              <View style={styles.profilePicture}>
+                <Image
+                  source={{ uri: profileUri }}
+                  style={styles.profileImage}
+                  resizeMode="cover"
+                />
+              </View>
+
+              <View style={styles.profileInfo}>
+                <Text style={styles.name}>Person Name</Text>
+                <Text style={styles.company}>Company Name</Text>
+              </View>
             </View>
-          )}
+            <View className="flex-row w-[75%] justify-around">
+              <TouchableOpacity
+                style={styles.closeButton}
+                className="bg-green-500"
+                onPress={onClose}
+              >
+                <Text style={styles.closeButtonText}>Add</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                className="bg-red-500"
+                // onPress={async () => {
+                //   const userId = await getItem("userId");
+                //   const handleDeleteNotification = async (notificationId) => {
+                //     const notifications = await deleteIndieNotificationInbox(
+                //       userId,
+                //       notificationId,
+                //       25674,
+                //       "6Kka30YI9fQ1rmbvtyUDkX"
+                //     );
+                //     console.log("notifications: ", notifications);
+                //     setData(notifications);
+                //   };
+                //   handleDeleteNotification();
+                //   onClose();
+                // }}
 
-          {/* Profile Details */}
-          <View style={styles.profileContainer}>
-            <View style={styles.profilePicture}>
-              <Image
-                source={{ uri: "https://via.placeholder.com/100" }}
-                style={styles.profileImage}
-                resizeMode="cover"
-              />
-            </View>
-
-            <View style={styles.profileInfo}>
-              <Text style={styles.name}>Person Name</Text>
-              <Text style={styles.company}>Company Name</Text>
+                // TODO: the state function is to be set to ensure the setData sets the new array of notifs
+              >
+                <Text style={styles.closeButtonText}>Ignore</Text>
+              </TouchableOpacity>
             </View>
           </View>
-
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
         </Animated.View>
-      </Animated.View>
-    </View>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 10,
-  },
-  container: {
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  container: {
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   modalContent: {
     backgroundColor: "white",
@@ -222,7 +234,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   closeButton: {
-    backgroundColor: "#007AFF",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 10,

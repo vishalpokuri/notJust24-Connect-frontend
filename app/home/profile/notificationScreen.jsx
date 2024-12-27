@@ -13,9 +13,8 @@ import {
   getIndieNotificationInbox,
   deleteIndieNotificationInbox,
 } from "native-notify";
-
 import { getItem } from "../../../utils/asyncStorage";
-import { isTokenKind } from "typescript";
+import NotificationItem from "../../../components/ui/notification";
 
 export default function NotificationScreen() {
   const [data, setData] = useState([]);
@@ -49,26 +48,26 @@ export default function NotificationScreen() {
   }, [userId]);
 
   // Render each notification item
-  const renderItem = ({ item }) => (
-    <View className="flex items-center space-x-4 rounded-lg border p-4 shadow-sm transition-all hover:shadow-md bg-[#1e1e1e] w-[90%] mx-auto">
-      <View className="flex-shrink-0">
-        <Image
-          src="https://picsum.photos/200"
-          alt={title}
-          className="h-12 w-12 rounded-full object-cover"
-        />
-      </View>
-      <View className="flex-1 min-w-0">
-        <Text className="text-sm font-medium text-gray-900 truncate">
-          {item.title}
-        </Text>
-        <Text className="text-sm text-gray-500 truncate">{item.message}</Text>
-      </View>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const pushedData = JSON.parse(item.pushData); // Parse the pushData string
+
+    return (
+      <NotificationItem
+        notificationId={item.notification_id}
+        selfieUri={pushedData.selfieUri}
+        profileUri={pushedData.profileUri}
+        title={item.title}
+        message={item.message}
+      />
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <Text className="font-bold m-4 mt-8 ml-6 text-3xl text-white">
+        History
+      </Text>
       {/* FlatList to render notifications */}
       <FlatList
         data={data}
