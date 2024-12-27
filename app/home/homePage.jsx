@@ -14,8 +14,9 @@ import ToggleButton from "../../components/homePageComps/toggleButton";
 import Qr from "../../components/homePageComps/Qr";
 import Nfc from "../../components/homePageComps/Nfc";
 import HomePageHeader from "../../components/homePageComps/header";
+
 import ScanResultModal from "../../components/modal/scanResultmodal";
-import images from "../../constants/images";
+
 const HomePage = () => {
   const [isQRmode, setIsQRmode] = useState(true);
   const router = useRouter(); // Use the hook here
@@ -27,10 +28,10 @@ const HomePage = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <ScanResultModal
+        {/* <ScanResultModal
           isVisible={true}
           selfieUri="https://picsum.photos/4608/2590"
-        />
+        /> */}
         <View style={styles.contentWrapper}>
           <HomePageHeader />
           <View style={styles.spacer} />

@@ -13,6 +13,7 @@ const HomePageHeader = () => {
         <TouchableOpacity
           className="w-12 h-12 rounded-full justify-center overflow-hidden flex-row items-center mr-1"
           style={styles.glassContainer}
+          onPress={() => router.push("./profile/notificationScreen")}
         >
           <Svg
             xmlns="http://www.w3.org/2000/svg"

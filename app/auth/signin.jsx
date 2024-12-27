@@ -8,6 +8,7 @@ import OtherLogger from "../../components/ui/otherLogger";
 import { Link, router } from "expo-router";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
 import { setItem } from "../../utils/asyncStorage";
+
 export default function Signin() {
   const [form, setForm] = useState({
     email: "",
@@ -28,7 +29,7 @@ export default function Signin() {
 
       if (response.ok) {
         setTimeout(() => {
-          router.push("/signup/otp");
+          router.push("./signup/otp");
           setIsSubmitting(false);
         }, 500);
       }

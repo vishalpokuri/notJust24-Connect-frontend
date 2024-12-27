@@ -9,6 +9,11 @@ import { BASE_API_URL } from "../../../../constants/ngrokRoute";
 import { router } from "expo-router";
 import OTPResend from "../../../../components/ui/OTPresend";
 import { getItem, setItem } from "../../../../utils/asyncStorage";
+
+
+import { registerIndieID, unregisterIndieDevice } from 'native-notify';
+import axios from 'axios';
+
 const Otp = () => {
   const [otpValue, setOtpValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,6 +30,7 @@ const Otp = () => {
       const data = await response.json();
 
       if (response.ok) {
+        registerIndieID(data.userId, 25674, "6Kka30YI9fQ1rmbvtyUDkX");        
         await setItem("userId", data.userId);
         await setItem("accessToken", data.accessToken);
       } else {

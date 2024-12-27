@@ -27,11 +27,7 @@
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": [
-      "expo-router",
-      "expo-font",
-      "expo-camera"
-    ],
+    "plugins": ["expo-router", "expo-font", "expo-camera"],
     "experiments": {
       "typedRoutes": true
     },
@@ -43,6 +39,7 @@
         "projectId": "063827b5-c53a-421f-a629-cbf629673d46"
       }
     },
+    "newArchEnabled": true,
     "owner": "vishcanum"
   }
 }
