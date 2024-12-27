@@ -10,21 +10,32 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 
-const ConnectionModal = ({ selfieUri, isVisible, onClose }) => {
+const ScanResultModal = ({ selfieUri, isVisible, onClose }) => {
   const [isPortrait, setIsPortrait] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const fadeAnim = new Animated.Value(0);
   const slideAnim = new Animated.Value(Dimensions.get("window").height);
 
   useEffect(() => {
     if (selfieUri) {
-      Image.getSize(selfieUri, (width, height) => {
-        setIsPortrait(height > width);
-      });
+      setImageLoaded(false); // Reset when new image is provided
+      Image.getSize(
+        selfieUri,
+        (width, height) => {
+          setIsPortrait(height > width);
+          setImageLoaded(true);
+        },
+        (error) => {
+          console.error("Error loading image:", error);
+          setImageLoaded(false);
+        }
+      );
     }
   }, [selfieUri]);
 
   useEffect(() => {
-    if (isVisible) {
+    // Only animate if both image is loaded and modal should be visible
+    if (isVisible && imageLoaded) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -52,9 +63,12 @@ const ConnectionModal = ({ selfieUri, isVisible, onClose }) => {
         }),
       ]).start();
     }
-  }, [isVisible]);
+  }, [isVisible, imageLoaded]);
 
-  if (!isVisible) return null;
+  // Don't render anything if modal shouldn't be visible or image isn't loaded
+  if (!isVisible || !imageLoaded) {
+    return null;
+  }
 
   return (
     <View style={styles.wrapper}>
@@ -85,7 +99,6 @@ const ConnectionModal = ({ selfieUri, isVisible, onClose }) => {
           <Text style={styles.title}>New Connection Request</Text>
           {/* Selfie Section */}
 
-          {/* Profile Section */}
           {selfieUri && (
             <View
               style={[
@@ -221,4 +234,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ConnectionModal;
+export default ScanResultModal;

@@ -17,16 +17,32 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff"
       },
-      "package": "com.vishal.connections"
+      "package": "com.vishal.connections",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-router", "expo-font", "expo-camera"],
-
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-camera"
+    ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "063827b5-c53a-421f-a629-cbf629673d46"
+      }
+    },
+    "owner": "vishcanum"
   }
 }
