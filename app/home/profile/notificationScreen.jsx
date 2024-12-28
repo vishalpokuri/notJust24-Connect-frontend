@@ -49,10 +49,11 @@ export default function NotificationScreen() {
 
   // Render each notification item
   const renderItem = ({ item }) => {
-    const pushedData = JSON.parse(item.pushData); // Parse the pushData string
+    const pushedData = JSON.parse(item.pushData);
 
     return (
       <NotificationItem
+        setData={setData}
         notificationId={item.notification_id}
         selfieUri={pushedData.selfieUri}
         profileUri={pushedData.profileUri}

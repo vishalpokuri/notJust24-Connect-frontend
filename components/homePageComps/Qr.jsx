@@ -11,8 +11,8 @@ const Qr = () => {
     const fetchUserId = async () => {
       try {
         // Fetch the userId from AsyncStorage or another async source
-        // const fetchedUserId = await getItem("userId");
-        const fetchedUserId = "bullshit";
+        const fetchedUserId = await getItem("userId");
+
         setUserId(fetchedUserId);
       } catch (error) {
         console.error("Error fetching userId:", error);

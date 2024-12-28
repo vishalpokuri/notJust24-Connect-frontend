@@ -9,6 +9,7 @@ export default function NotificationItem({
   title,
   notificationId,
   message,
+  setData,
 }) {
   const [isModalVisible, setModalVisible] = useState(false);
 
@@ -40,6 +41,7 @@ export default function NotificationItem({
 
       {/* Modal */}
       <ScanResultModal
+        setData={setData}
         notificationId={notificationId}
         isVisible={isModalVisible}
         onClose={toggleModal} // Pass the toggle function to close the modal

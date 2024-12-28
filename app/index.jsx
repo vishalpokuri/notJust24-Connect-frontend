@@ -13,7 +13,7 @@ export default function Index() {
         <View className="w-full p-6"></View>
         <CustomButton
           title="SignIn"
-          handlePress={() => router.push("/auth/signin")}
+          handlePress={() => router.push("/home/homePage")}
         />
       </ScrollView>
       <StatusBar backgroundColor="#0a0a0a" style="light" />
@@ -22,3 +22,4 @@ export default function Index() {
 }
 
 //auth/signin
+//home/homePage

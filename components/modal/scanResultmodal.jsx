@@ -18,9 +18,39 @@ const ScanResultModal = ({
   onClose,
   profileUri,
   notificationId,
+  setData,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [userId, setUserId] = useState(false);
   const fadeAnim = new Animated.Value(0);
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      let notifications = await deleteIndieNotificationInbox(
+        userId.toString(),
+        notificationId,
+        25674,
+        "6Kka30YI9fQ1rmbvtyUDkX"
+      );
+      console.log("notifications: ", notifications);
+      setData(notifications);
+    } catch (error) {
+      console.error("Error deleting notification: ", error);
+    }
+  };
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        // Fetch the userId from AsyncStorage or another async source
+        const fetchedUserId = await getItem("userId");
+        setUserId(fetchedUserId);
+      } catch (error) {
+        console.error("Error fetching userId:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
 
   useEffect(() => {
     if (selfieUri) {
@@ -124,21 +154,10 @@ const ScanResultModal = ({
               <TouchableOpacity
                 style={styles.closeButton}
                 className="bg-red-500"
-                // onPress={async () => {
-                //   const userId = await getItem("userId");
-                //   const handleDeleteNotification = async (notificationId) => {
-                //     const notifications = await deleteIndieNotificationInbox(
-                //       userId,
-                //       notificationId,
-                //       25674,
-                //       "6Kka30YI9fQ1rmbvtyUDkX"
-                //     );
-                //     console.log("notifications: ", notifications);
-                //     setData(notifications);
-                //   };
-                //   handleDeleteNotification();
-                //   onClose();
-                // }}
+                onPress={() => {
+                  handleDeleteNotification(notificationId);
+                  onClose();
+                }}
 
                 // TODO: the state function is to be set to ensure the setData sets the new array of notifs
               >

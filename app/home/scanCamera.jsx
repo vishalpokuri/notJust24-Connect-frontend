@@ -12,7 +12,7 @@ import CustomButton from "../../components/ui/customButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import ScanResultModal from "../../components/modal/scanResultmodal";
-
+import { BASE_API_URL } from "../../constants/ngrokRoute";
 const ScanCamera = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanningEnabled, setScanningEnabled] = useState(true);
@@ -42,17 +42,42 @@ const ScanCamera = () => {
       </SafeAreaView>
     );
   }
+  const fetchUserData = async (userId) => {
+    try {
+      const response = await fetch(
+        `${BASE_API_URL}/api/QR/userFetch?userId:${userId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        alert(`You are connecting with ${data.name}`);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const onBarcodeScanned = async (data) => {
+    // console.log("onBarcodeScanned triggered");
     if (!scanningEnabled) return;
+
     try {
       Vibration.vibrate();
       setScanningEnabled(false);
-      console.log(data);
+      //After scanning
+      //Step-1: Fetch the information of the person
+      fetchUserData(data.data);
+
+      //Step-2: Popup a modal with animation of connection
     } catch (error) {
-      alert("Error: ", "Failed to scan QR, try again");
-      setScanningEnabled((prev) => !prev);
+      alert("Error: Failed to scan QR, try again");
+      console.error(error);
+      setScanningEnabled(true);
     }
   };
+
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
       <ScrollView contentContainerStyle={{ height: "100%" }}>
