@@ -11,11 +11,21 @@ import { useState } from "react";
 import CustomButton from "../../components/ui/customButton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import ScanResultModal from "../../components/modal/scanResultmodal";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
+import ScanResultModal from "../../components/modal/scanResultModal";
+import { router } from "expo-router";
 const ScanCamera = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanningEnabled, setScanningEnabled] = useState(true);
+  //For modal
+  const [isModalVisible, setisModalVisible] = useState(false);
+  const [name, setName] = useState(false);
+  const [profileUri, setProfileUri] = useState(false);
+  const cdn = "https://d1crt8jpz4phpk.cloudfront.net";
+  const toggleModal = () => {
+    setisModalVisible(!isModalVisible);
+  };
+
   if (!permission) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
@@ -25,6 +35,7 @@ const ScanCamera = () => {
       </SafeAreaView>
     );
   }
+
   if (!permission.granted) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
@@ -42,6 +53,7 @@ const ScanCamera = () => {
       </SafeAreaView>
     );
   }
+
   const fetchUserData = async (userId) => {
     try {
       const response = await fetch(
@@ -52,15 +64,26 @@ const ScanCamera = () => {
         }
       );
       const data = await response.json();
+      const profilePhotoKey = data.profilePhotoKey.replace(
+        "connectionsapp/",
+        ""
+      );
+
       if (response.ok) {
-        alert(`You are connecting with ${data.name}`);
+        //Step-2: Popup a modal with animation of connection
+        setisModalVisible((prev) => !prev);
+        setProfileUri(`${cdn}/${profilePhotoKey}`);
+        setName(data.name);
+        setTimeout(() => {
+          router.push("./takeSelfie");
+        }, 2500);
       }
     } catch (error) {
       console.error(error);
     }
   };
+
   const onBarcodeScanned = async (data) => {
-    // console.log("onBarcodeScanned triggered");
     if (!scanningEnabled) return;
 
     try {
@@ -68,9 +91,8 @@ const ScanCamera = () => {
       setScanningEnabled(false);
       //After scanning
       //Step-1: Fetch the information of the person
-      fetchUserData(data.data);
 
-      //Step-2: Popup a modal with animation of connection
+      fetchUserData(data.data);
     } catch (error) {
       alert("Error: Failed to scan QR, try again");
       console.error(error);
@@ -88,6 +110,12 @@ const ScanCamera = () => {
             facing="back"
             onBarcodeScanned={onBarcodeScanned}
             barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
+          />
+          <ScanResultModal
+            name={name}
+            isVisible={isModalVisible}
+            onClose={toggleModal}
+            profileUri={profileUri}
           />
         </View>
       </ScrollView>

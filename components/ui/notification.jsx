@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
 
-import ScanResultModal from "../modal/scanResultmodal";
+import NotifModal from "../modal/notifiScreenModal";
 
 export default function NotificationItem({
   selfieUri,
@@ -40,7 +40,7 @@ export default function NotificationItem({
       </TouchableOpacity>
 
       {/* Modal */}
-      <ScanResultModal
+      <NotifModal
         setData={setData}
         notificationId={notificationId}
         isVisible={isModalVisible}

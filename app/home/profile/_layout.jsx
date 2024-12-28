@@ -7,9 +7,12 @@ const AuthLayout = () => {
       <Stack>
         <Stack.Screen name="profilePage" options={{ headerShown: false }} />
         <Stack.Screen name="yourConnections" options={{ headerShown: false }} />
-        <Stack.Screen name="notificationScreen" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="notificationScreen"
+          options={{ headerShown: false }}
+        />
       </Stack>
-      <StatusBar backgroundColor="#0a0a0a" style="light" />
+      <StatusBar backgroundColor="#000000" style="light" />
     </>
   );
 };

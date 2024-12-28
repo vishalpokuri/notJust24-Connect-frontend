@@ -15,7 +15,7 @@ import Qr from "../../components/homePageComps/Qr";
 import Nfc from "../../components/homePageComps/Nfc";
 import HomePageHeader from "../../components/homePageComps/header";
 
-import ScanResultModal from "../../components/modal/scanResultmodal";
+import NotifModal from "../../components/modal/notifiScreenModal";
 
 const HomePage = () => {
   const [isQRmode, setIsQRmode] = useState(true);
@@ -28,7 +28,7 @@ const HomePage = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* <ScanResultModal
+        {/* <NotifModal
           isVisible={true}
           selfieUri="https://picsum.photos/4608/2590"
         /> */}

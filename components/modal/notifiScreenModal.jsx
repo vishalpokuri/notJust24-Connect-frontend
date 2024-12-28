@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,24 +8,55 @@ import {
   TouchableOpacity,
   Modal, // Added Modal component
 } from "react-native";
-import LottieView from "lottie-react-native";
+import { getItem } from "../../utils/asyncStorage";
+import { deleteIndieNotificationInbox } from "native-notify";
 import { BlurView } from "expo-blur";
-import { router } from "expo-router";
 
-export default function ScanResultModal({
+const NotifModal = ({
+  selfieUri,
   isVisible,
   onClose,
   profileUri,
-  name,
-}) {
+  notificationId,
+  setData,
+}) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [userId, setUserId] = useState(false);
   const fadeAnim = new Animated.Value(0);
-  const rippleloadingAnim = useRef(null);
+
+  const handleDeleteNotification = async (notificationId) => {
+    try {
+      let notifications = await deleteIndieNotificationInbox(
+        userId.toString(),
+        notificationId,
+        25674,
+        "6Kka30YI9fQ1rmbvtyUDkX"
+      );
+      console.log("notifications: ", notifications);
+      setData(notifications);
+    } catch (error) {
+      console.error("Error deleting notification: ", error);
+    }
+  };
   useEffect(() => {
-    if (profileUri) {
+    const fetchUserId = async () => {
+      try {
+        // Fetch the userId from AsyncStorage or another async source
+        const fetchedUserId = await getItem("userId");
+        setUserId(fetchedUserId);
+      } catch (error) {
+        console.error("Error fetching userId:", error);
+      }
+    };
+
+    fetchUserId();
+  }, []);
+
+  useEffect(() => {
+    if (selfieUri) {
       setImageLoaded(false);
       Image.getSize(
-        profileUri,
+        selfieUri,
         (width, height) => {
           setImageLoaded(true);
         },
@@ -35,7 +66,7 @@ export default function ScanResultModal({
         }
       );
     }
-  }, [profileUri]);
+  }, [selfieUri]);
 
   useEffect(() => {
     if (isVisible && imageLoaded) {
@@ -44,12 +75,6 @@ export default function ScanResultModal({
         duration: 300,
         useNativeDriver: true,
       }).start();
-
-      const timeout = setTimeout(() => {
-        onClose();
-      }, 2500);
-
-      return () => clearTimeout(timeout);
     } else {
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -85,21 +110,26 @@ export default function ScanResultModal({
           ]}
         >
           <View style={styles.modalContent}>
-            <Text className="text-xl mb-4 text-white font-bold ">
-              You are connecting with
-            </Text>
-            {/* This section is for lottie animations */}
-            <View style={styles.animationContainer}>
-              {/* Lottie Animation */}
-              <LottieView
-                ref={rippleloadingAnim}
-                source={require("../../assets/lottieAnimations/Animation - 1735385973187.json")}
-                autoPlay
-                loop
-                style={styles.lottieAnimation}
-              />
+            <Text style={styles.title}>New Connection Request</Text>
 
-              {/* Profile Image */}
+            {selfieUri && (
+              <View
+                style={[
+                  styles.selfieContainer,
+                  selfieUri.includes("portrait")
+                    ? styles.portraitImage
+                    : styles.landscapeImage,
+                ]}
+              >
+                <Image
+                  source={{ uri: selfieUri }}
+                  style={styles.selfieImage}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+
+            <View style={styles.profileContainer}>
               <View style={styles.profilePicture}>
                 <Image
                   source={{ uri: profileUri }}
@@ -107,21 +137,39 @@ export default function ScanResultModal({
                   resizeMode="cover"
                 />
               </View>
-            </View>
 
-            <View style={styles.profileContainer}>
               <View style={styles.profileInfo}>
-                <Text className="font-semibold text-white text-base">
-                  {name}
-                </Text>
+                <Text style={styles.name}>Person Name</Text>
+                <Text style={styles.company}>Company Name</Text>
               </View>
+            </View>
+            <View className="flex-row w-[75%] justify-around">
+              <TouchableOpacity
+                style={styles.closeButton}
+                className="bg-green-500"
+                onPress={onClose}
+              >
+                <Text style={styles.closeButtonText}>Add</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                className="bg-red-500"
+                onPress={() => {
+                  handleDeleteNotification(notificationId);
+                  onClose();
+                }}
+
+                // TODO: the state function is to be set to ensure the setData sets the new array of notifs
+              >
+                <Text style={styles.closeButtonText}>Ignore</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Animated.View>
       </View>
     </Modal>
   );
-}
+};
 
 const styles = StyleSheet.create({
   modalOverlay: {
@@ -137,7 +185,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalContent: {
-    backgroundColor: "#1e1e1e",
+    backgroundColor: "white",
     borderRadius: 20,
     padding: 20,
     width: "90%",
@@ -181,12 +229,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profilePicture: {
-    width: 120, // Adjust size as needed
-    height: 120, // Adjust size as needed
-    borderRadius: 60, // Ensures the image is circular
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     overflow: "hidden",
-    justifyContent: "center",
-    alignItems: "center",
+    marginRight: 15,
   },
   profileImage: {
     width: "100%",
@@ -194,13 +241,11 @@ const styles = StyleSheet.create({
   },
   profileInfo: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
   name: {
     fontSize: 18,
     fontWeight: "600",
-    color: "white",
+    color: "#333",
   },
   company: {
     fontSize: 16,
@@ -217,16 +262,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  animationContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative", // Ensures positioning within this container
-    width: 200, // Adjust size as needed
-    height: 200, // Adjust size as needed
-  },
-  lottieAnimation: {
-    position: "absolute", // Places it in the background
-    width: "100%",
-    height: "100%",
-  },
 });
+
+export default NotifModal;
