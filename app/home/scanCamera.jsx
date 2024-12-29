@@ -14,6 +14,8 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
 import ScanResultModal from "../../components/modal/scanResultModal";
 import { router } from "expo-router";
+import { setItem } from "../../utils/asyncStorage";
+
 const ScanCamera = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanningEnabled, setScanningEnabled] = useState(true);
@@ -57,12 +59,16 @@ const ScanCamera = () => {
   const fetchUserData = async (userId) => {
     try {
       const response = await fetch(
-        `${BASE_API_URL}/api/QR/userFetch?userId:${userId}`,
+        `${BASE_API_URL}/api/QR/userFetch?userId=${userId}`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
+          cache: "no-store", // Disable fetch cache
         }
       );
+
+      await setItem("userId2", userId);
+
       const data = await response.json();
       const profilePhotoKey = data.profilePhotoKey.replace(
         "connectionsapp/",
@@ -76,6 +82,7 @@ const ScanCamera = () => {
         setName(data.name);
         setTimeout(() => {
           router.push("./takeSelfie");
+          setScanningEnabled(true);
         }, 2500);
       }
     } catch (error) {
@@ -90,9 +97,11 @@ const ScanCamera = () => {
       Vibration.vibrate();
       setScanningEnabled(false);
       //After scanning
-      //Step-1: Fetch the information of the person
 
-      fetchUserData(data.data);
+      //Step-1: Fetch the information of the person
+      await fetchUserData(data.data);
+
+      console.log(data.data);
     } catch (error) {
       alert("Error: Failed to scan QR, try again");
       console.error(error);

@@ -123,7 +123,7 @@ export default function ScanResultModal({
   );
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
     justifyContent: "center",

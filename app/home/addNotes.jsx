@@ -1,74 +1,238 @@
-import { Text, StyleSheet, Image, View } from "react-native";
+import { Text, StyleSheet, Image, View, TextInput } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { BASE_API_URL } from "../../constants/ngrokRoute";
 import { useEffect, useState } from "react";
-const AddNotes = () => {
-  const { height, width, uri } = useLocalSearchParams();
-  const [imageData, setImageData] = useState({
-    height: "",
-    width: "",
-    uri: "",
-  });
+import CustomButton from "../../components/ui/customButton";
+import ListBottomSheet from "../../components/sheetComps/listSheet";
+import { getItem } from "../../utils/asyncStorage";
+import LoadingSuccessModal from "../../components/modal/loadingSuccessModal";
+const AddNotes = ({ height, width, uri, setImage }) => {
   const [potrait, setPotrait] = useState(null);
-  useEffect(() => {
-    // Decode the URI if it's encoded
-    // TODO: The photo is getting deleted automatically when screen changed, might considering saving somewhere.
-    const decodedUri = decodeURI(uri);
-    console.log("Decoded URI:", decodedUri); // Debug log
+  const [notes, setNotes] = useState(null);
+  const [visible, setVisible] = useState(false);
+  //This is for success Modal
+  const [successModalVisible, setSuccessModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-    setImageData({
-      height,
-      width,
-      uri: decodedUri,
-    });
+  const [imageMetaData, setimageMetaData] = useState({ uri: "", type: "" });
+  useEffect(() => {
     if (height > width) {
       setPotrait(true);
     } else {
       setPotrait(false);
     }
+
+    if (uri) {
+      setimageMetaData({
+        uri,
+        type: "image",
+      });
+    }
   }, [height, width, uri]);
+  const retakePicture = () => {
+    setImage(null);
+  };
+  const addToLists = () => {
+    setVisible(true);
+  };
+  const closeModal = () => {
+    setVisible(false);
+  };
+
+  //Presigned URL to upload the photo
+  const submit = async (listId) => {
+    setSuccessModalVisible(true);
+    setIsLoading(true);
+    setVisible(false);
+    if (uri) {
+      const accessToken = await getItem("accessToken");
+      const userId2 = await getItem("userId2");
+      try {
+        const response = await fetch(
+          `${BASE_API_URL}/api/aws/presignedurlSelfie?&mimetype=${imageMetaData.type}&userId2=${userId2}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.presignedUrl) {
+          const uploadResponse = await fetch(data.presignedUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": imageMetaData.type,
+            },
+            body: await fetch(imageMetaData.uri).then((res) => res.blob()),
+          });
+
+          if (uploadResponse.status === 200) {
+            const userId = await getItem("userId");
+            const keyUploadResponse = await fetch(
+              `${BASE_API_URL}/api/QR/uploadSelfieConnection`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  userId1: userId,
+                  userId2: userId2,
+                  selfieKey: data.key,
+                }),
+              }
+            );
+            const data2 = await keyUploadResponse.json();
+            if (keyUploadResponse.ok) {
+              uploadInList(listId, data2.connectionId, setVisible);
+            } else {
+              console.error("Error saving file key to backend.");
+            }
+          } else {
+            console.error("File upload failed.");
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const uploadInList = async (listId, connectionId, setVisible) => {
+    try {
+      const response = await fetch(`${BASE_API_URL}/api/list/uploadInList`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          listId,
+          connectionId,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setIsLoading(false);
+        setIsSuccess(true);
+      } else {
+        console.log(data);
+        setVisible(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={{ width: "100%", padding: 16, minHeight: "85%" }}>
-          <Text style={styles.headerText}>Add Notes</Text>
-          {imageData.uri ? (
+      <View style={styles.contentContainer}>
+        <Text className="text-3xl font-bold text-white m-4 mb-0">
+          Add Notes
+        </Text>
+        {uri ? (
+          <View
+            style={[
+              styles.imageContainer,
+              {
+                width: potrait ? "58%" : "90%",
+                borderRadius: potrait ? 18 : 12,
+              },
+            ]}
+          >
             <Image
-              source={{ uri: imageData.uri }}
+              source={{ uri: uri }}
               style={[
                 styles.image,
                 {
-                  width: potrait ? "40%" : "80%",
-                  height: 300, // Add a fixed height
+                  width: potrait ? "100%" : "100%",
+                  height: potrait ? 300 : 265,
                 },
               ]}
               onError={(error) =>
                 console.log("Image loading error:", error.nativeEvent.error)
               }
-              onLoad={() => console.log("Image loaded successfully")}
             />
-          ) : (
-            <Text style={[styles.headerText, { fontSize: 16 }]}>
-              Loading image...
-            </Text>
-          )}
+          </View>
+        ) : (
+          <Text style={[styles.headerText, { fontSize: 16 }]}>
+            Loading image...
+          </Text>
+        )}
+        <View className="flex-row">
+          <CustomButton
+            title="Retake Selfie"
+            handlePress={retakePicture}
+            containerStyles="w-[40%] mx-auto h-[40px] bg-[#ddd]"
+            textStyles="font-bold text-base"
+          />
+          <CustomButton
+            title="Continue"
+            handlePress={addToLists}
+            containerStyles="w-[40%] mx-auto h-[40px] bg-[#ddd]"
+            textStyles="font-bold text-base"
+          />
         </View>
-      </ScrollView>
+        {/* Section for notes */}
+        <TextInput
+          style={styles.textarea2}
+          multiline
+          numberOfLines={3}
+          placeholder="A short notes about your connection?"
+          className="border-[0.5px] border-solid border-[#888] rounded-md mx-auto"
+          placeholderTextColor="#888"
+          value={notes}
+          onChangeText={(e) => {
+            setNotes(e);
+          }}
+        />
+        <ListBottomSheet
+          visible={visible}
+          onClose={closeModal}
+          submit={submit}
+        />
+        <LoadingSuccessModal
+          isVisible={successModalVisible}
+          onClose={() => {
+            setSuccessModalVisible(false);
+            setIsLoading(false);
+            setIsSuccess(false);
+          }}
+          isLoading={isLoading}
+          isSuccess={isSuccess}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
 export default AddNotes;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "black",
   },
-  scrollContainer: {
-    flexGrow: 1,
+
+  contentContainer: {
+    width: "100%",
+    padding: 16,
+    minHeight: "85%",
+  },
+  imageContainer: {
+    marginTop: 20,
+
+    alignSelf: "center",
+    borderRadius: 12,
+    overflow: "hidden", // This is crucial for showing the borderRadius
+  },
+  image: {
+    resizeMode: "contain",
+    backgroundColor: "transparent",
   },
   headerText: {
     fontSize: 24,
@@ -78,10 +242,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: "left",
   },
-  image: {
-    resizeMode: "contain",
-    alignSelf: "center",
+  textarea2: {
+    height: 100,
+    width: "95%",
+    padding: 10,
+    backgroundColor: "#222",
+    color: "#fff",
+    fontSize: 16,
     borderRadius: 8,
-    marginTop: 20,
+    textAlignVertical: "top",
   },
 });

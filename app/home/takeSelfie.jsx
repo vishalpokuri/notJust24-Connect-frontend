@@ -13,6 +13,7 @@ import {
 } from "react-native";
 
 import { router } from "expo-router";
+import AddNotes from "./addNotes";
 const TakeSelfieScreen = () => {
   const cameraRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
@@ -24,21 +25,16 @@ const TakeSelfieScreen = () => {
   });
   const [type, setType] = useState("front");
 
-  const retakePicture = () => {
-    setImage(null);
-  };
-
-  useEffect(() => {
-    if (image) {
-      const params = new URLSearchParams({
-        height: imageData.height.toString(),
-        width: imageData.width.toString(),
-        uri: imageData.uri,
-      });
-
-      router.push(`./addNotes?${params.toString()}`);
-    }
-  }, [image]);
+  if (image) {
+    return (
+      <AddNotes
+        height={imageData.height}
+        width={imageData.width}
+        uri={imageData.uri}
+        setImage={setImage}
+      />
+    );
+  }
 
   if (!permission) {
     return (
@@ -66,6 +62,7 @@ const TakeSelfieScreen = () => {
       </SafeAreaView>
     );
   }
+
   const takePicture = async () => {
     if (cameraRef) {
       try {
