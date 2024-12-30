@@ -30,7 +30,7 @@ const HomePageHeader = () => {
           className="w-12 h-12  rounded-full justify-center overflow-hidden flex-row items-center"
           style={styles.glassContainer}
           onPress={() => {
-            router.push("./profile/");
+            router.push("./profile/profilePage");
           }}
         >
           {image ? (

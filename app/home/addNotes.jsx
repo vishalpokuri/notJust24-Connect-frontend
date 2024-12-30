@@ -1,4 +1,11 @@
-import { Text, StyleSheet, Image, View, TextInput } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  Image,
+  View,
+  TextInput,
+  Keyboard,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScrollView } from "react-native";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
@@ -35,6 +42,7 @@ const AddNotes = ({ height, width, uri, setImage }) => {
     setImage(null);
   };
   const addToLists = () => {
+    Keyboard.dismiss();
     setVisible(true);
   };
   const closeModal = () => {
@@ -49,6 +57,9 @@ const AddNotes = ({ height, width, uri, setImage }) => {
     if (uri) {
       const accessToken = await getItem("accessToken");
       const userId2 = await getItem("userId2");
+      const userId = await getItem("userId");
+
+      //1. Upload selfie
       try {
         const response = await fetch(
           `${BASE_API_URL}/api/aws/presignedurlSelfie?&mimetype=${imageMetaData.type}&userId2=${userId2}`,
@@ -73,6 +84,7 @@ const AddNotes = ({ height, width, uri, setImage }) => {
           });
 
           if (uploadResponse.status === 200) {
+            //2. Create a connection and put the selfie key
             const userId = await getItem("userId");
             const keyUploadResponse = await fetch(
               `${BASE_API_URL}/api/QR/uploadSelfieConnection`,
@@ -89,7 +101,11 @@ const AddNotes = ({ height, width, uri, setImage }) => {
               }
             );
             const data2 = await keyUploadResponse.json();
+            //3. Put that in Connection
             if (keyUploadResponse.ok) {
+              //3. Create a notes Object with the connectionId and UserId
+              createNotes(data2.connectionId, userId, notes);
+              //4. Put that in Connection
               uploadInList(listId, data2.connectionId, setVisible);
             } else {
               console.error("Error saving file key to backend.");
@@ -123,6 +139,30 @@ const AddNotes = ({ height, width, uri, setImage }) => {
       } else {
         console.log(data);
         setVisible(true);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const createNotes = async (connectionId, userId, notes) => {
+    try {
+      const response = await fetch(`${BASE_API_URL}/api/notes/createNotes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          connectionId,
+          notes,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Created Notes successfully");
+      } else {
+        console.error("Unable to create notes");
       }
     } catch (error) {
       console.log(error);

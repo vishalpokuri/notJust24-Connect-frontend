@@ -31,7 +31,10 @@ const ScanCamera = () => {
   if (!permission) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
-        <ScrollView contentContainerStyle={{ height: "100%" }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ height: "100%" }}
+        >
           <ActivityIndicator size="large" />
         </ScrollView>
       </SafeAreaView>
@@ -41,7 +44,10 @@ const ScanCamera = () => {
   if (!permission.granted) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
-        <ScrollView contentContainerStyle={{ height: "100%" }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ height: "100%" }}
+        >
           <View className="justify-center items-center w-[90%] h-[90%] mx-auto">
             <Text className="text-white font-semibold text-lg">
               Camera access is required to scan QR Code
@@ -100,8 +106,6 @@ const ScanCamera = () => {
 
       //Step-1: Fetch the information of the person
       await fetchUserData(data.data);
-
-      console.log(data.data);
     } catch (error) {
       alert("Error: Failed to scan QR, try again");
       console.error(error);
@@ -111,7 +115,10 @@ const ScanCamera = () => {
 
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ height: "100%" }}
+      >
         <View className="justify-center items-center m-auto">
           <Text className="text-white font-bold text-lg mb-2">Scan the QR</Text>
           <CameraView

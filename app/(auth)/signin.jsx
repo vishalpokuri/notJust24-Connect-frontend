@@ -8,8 +8,8 @@ import OtherLogger from "../../components/ui/otherLogger";
 import { Link, router } from "expo-router";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
 import { setItem } from "../../utils/asyncStorage";
-
-export default function Signin() {
+import React from "react";
+const Signin = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -29,7 +29,7 @@ export default function Signin() {
 
       if (response.ok) {
         setTimeout(() => {
-          router.push("./signup/otp");
+          router.push("/signup/otp");
           setIsSubmitting(false);
         }, 500);
       }
@@ -83,7 +83,7 @@ export default function Signin() {
             </Text>
 
             <Link
-              href="/auth/signup/sign-up"
+              href="/(auth)/signup/sign-up"
               className="text-[#a0f963] text-base"
             >
               Sign Up
@@ -97,4 +97,6 @@ export default function Signin() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+};
+
+export default Signin;

@@ -58,7 +58,7 @@ const AddProfilePhoto = () => {
 
       try {
         const response = await fetch(
-          `${BASE_API_URL}/api/aws/presignedurlProfile?filename=${selectedImage.name}&mimetype=${selectedImage.type}`,
+          `${BASE_API_URL}/api/aws/presignedurl?filename=${selectedImage.name}&mimetype=${selectedImage.type}`,
           {
             method: "GET",
             headers: {

@@ -11,11 +11,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 
 const LoadingSuccessModal = ({ isVisible, onClose, isLoading, isSuccess }) => {
-  const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const successAnimation = useRef(null);
 

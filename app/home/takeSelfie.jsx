@@ -39,7 +39,10 @@ const TakeSelfieScreen = () => {
   if (!permission) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
-        <ScrollView contentContainerStyle={{ height: "100%" }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ height: "100%" }}
+        >
           <ActivityIndicator size="large" />
         </ScrollView>
       </SafeAreaView>
@@ -48,7 +51,10 @@ const TakeSelfieScreen = () => {
   if (!permission.granted) {
     return (
       <SafeAreaView className="bg-[#0a0a0a] h-full">
-        <ScrollView contentContainerStyle={{ height: "100%" }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ height: "100%" }}
+        >
           <View className="justify-center items-center w-[90%] h-[90%] mx-auto">
             <Text className="text-white font-semibold text-lg">
               Camera access is required to take Selfie

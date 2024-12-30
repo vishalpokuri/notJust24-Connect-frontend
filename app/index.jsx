@@ -9,7 +9,10 @@ export default function Index() {
   registerNNPushToken(25674, "6Kka30YI9fQ1rmbvtyUDkX");
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ height: "100%" }}
+      >
         <View className="w-full p-6"></View>
         <CustomButton
           title="SignIn"
