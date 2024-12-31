@@ -16,7 +16,7 @@ import {
 import { getItem } from "../../../utils/asyncStorage";
 import NotificationItem from "../../../components/ui/notification";
 
-export default function NotificationScreen() {
+export default function datacreen() {
   const [data, setData] = useState([]);
   const [userId, setUserId] = useState(null);
 
@@ -40,12 +40,23 @@ export default function NotificationScreen() {
           20,
           0
         );
-        console.log("notifications: ", notifications);
         setData(notifications);
       }
       fetchNotifications();
     }
   }, [userId]);
+
+  //loading State
+  if (!data) {
+    return (
+      <SafeAreaView
+        className="bg-[#0a0a0a] h-full flex items-center justify-center"
+        style={styles.container}
+      >
+        <ActivityIndicator color="white" size={24} />
+      </SafeAreaView>
+    );
+  }
 
   // Render each notification item
   const renderItem = ({ item }) => {
@@ -70,12 +81,18 @@ export default function NotificationScreen() {
         History
       </Text>
       {/* FlatList to render notifications */}
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.notification_id.toString()}
-        contentContainerStyle={styles.scrollContainer}
-      />
+      {data.length > 0 ? (
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.notification_id.toString()}
+          contentContainerStyle={styles.scrollContainer}
+        />
+      ) : (
+        <Text className="text-base text-[#ddd] font-base w-[80%] text-center mx-auto mt-[20%]">
+          All Clean, You dont have any new notifications!
+        </Text>
+      )}
     </SafeAreaView>
   );
 }

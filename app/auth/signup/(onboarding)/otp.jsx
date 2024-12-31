@@ -91,10 +91,7 @@ const Otp = () => {
 
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ height: "100%" }}
-      >
+      <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="w-full p-6 min-h-[85vh]">
           <Text className="text-3xl my-6 text-left font-semibold text-white">
             Enter OTP

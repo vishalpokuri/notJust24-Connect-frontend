@@ -27,14 +27,7 @@ const HomePage = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollContainer}
-      >
-        {/* <NotifModal
-          isVisible={true}
-          selfieUri="https://picsum.photos/4608/2590"
-        /> */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.contentWrapper}>
           <HomePageHeader />
           <View style={styles.spacer} />

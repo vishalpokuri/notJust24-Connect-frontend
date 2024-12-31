@@ -15,7 +15,7 @@ import { BASE_API_URL } from "../../constants/ngrokRoute";
 import ScanResultModal from "../../components/modal/scanResultModal";
 import { router } from "expo-router";
 import { setItem } from "../../utils/asyncStorage";
-
+import dog from "../../assets/images/dogCunning.jpg";
 const ScanCamera = () => {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanningEnabled, setScanningEnabled] = useState(true);
@@ -76,18 +76,26 @@ const ScanCamera = () => {
       await setItem("userId2", userId);
 
       const data = await response.json();
-      const profilePhotoKey = data.profilePhotoKey.replace(
-        "connectionsapp/",
-        ""
-      );
 
       if (response.ok) {
+        const profilePhotoKey = data.profilePhotoKey.replace(
+          "connectionsapp/",
+          ""
+        );
         //Step-2: Popup a modal with animation of connection
         setisModalVisible((prev) => !prev);
         setProfileUri(`${cdn}/${profilePhotoKey}`);
         setName(data.name);
         setTimeout(() => {
           router.push("./takeSelfie");
+          setScanningEnabled(true);
+        }, 2500);
+      } else {
+        setisModalVisible((prev) => !prev);
+        setProfileUri(`${cdn}/profiles/dogCunning.jpg`);
+        setName("Are you sure he's a Connect user Dawg?");
+        setTimeout(() => {
+          router.back();
           setScanningEnabled(true);
         }, 2500);
       }

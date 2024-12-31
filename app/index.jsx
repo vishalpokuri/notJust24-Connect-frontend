@@ -5,21 +5,58 @@ import registerNNPushToken from "native-notify";
 import { StatusBar } from "expo-status-bar";
 import { router } from "expo-router";
 import * as SystemUI from "expo-system-ui";
-import { useEffect } from "react";
+import React from "react";
+import { useEffect, useState, useCallback } from "react";
+import * as SplashScreen from "expo-splash-screen";
 import WelcomeFlow from "../components/welcomeFlowComps/main";
+
+// Configure SplashScreen before any component rendering
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
+
 export default function Index() {
+  const [appIsReady, setAppIsReady] = useState(false);
+
   useEffect(() => {
-    // Set the system UI background color as soon as the app starts
-    SystemUI.setBackgroundColorAsync("#000000"); // Example color (black)
+    async function prepare() {
+      try {
+        registerNNPushToken(25674, "6Kka30YI9fQ1rmbvtyUDkX");
+        await SystemUI.setBackgroundColorAsync("#000000");
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      } catch (e) {
+        console.warn("Error preparing app:", e);
+      } finally {
+        setAppIsReady(true);
+      }
+    }
+
+    prepare();
   }, []);
-  registerNNPushToken(25674, "6Kka30YI9fQ1rmbvtyUDkX");
+
+  const onLayoutRootView = useCallback(async () => {
+    if (appIsReady) {
+      try {
+        await SplashScreen.hideAsync();
+      } catch (e) {
+        console.warn("Error hiding splash screen:", e);
+      }
+    }
+  }, [appIsReady]);
+
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
-    <SafeAreaView className="bg-[#000] h-full">
+    <SafeAreaView className="bg-[#000] h-full" onLayout={onLayoutRootView}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ height: "100%" }}
       >
-        <View className="w-full p-6"></View>
+        <View className="w-full p-6" />
         <WelcomeFlow />
         <CustomButton
           containerStyles="w-[80%] mx-auto"
@@ -31,6 +68,3 @@ export default function Index() {
     </SafeAreaView>
   );
 }
-
-//auth/signin
-//home/homePage

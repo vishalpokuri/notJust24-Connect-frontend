@@ -8,6 +8,7 @@ import OtherLogger from "../../components/ui/otherLogger";
 import { Link, router } from "expo-router";
 import { BASE_API_URL } from "../../constants/ngrokRoute";
 import { setItem } from "../../utils/asyncStorage";
+import CustomModal from "../../components/modal/customModal";
 
 export default function Signin() {
   const [form, setForm] = useState({
@@ -15,22 +16,33 @@ export default function Signin() {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const toggleClose = () => {
+    setVisible(false);
+  };
   const submit = async () => {
     try {
       //future use
       await setItem("email", form.email);
 
       setIsSubmitting(true);
-      const response = await fetch(`${BASE_API_URL}/api/auth/signup`, {
+      const response = await fetch(`${BASE_API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      const data = await response.json();
       if (response.ok) {
         setTimeout(() => {
-          router.push(`./otp?otpToken=${data.otpToken}`);
+          router.push(`./signup/otp?otpToken=${data.otpToken}`);
 
           setIsSubmitting(false);
+        }, 500);
+      } else {
+        //Modal with custom display
+        setVisible(true);
+        setTimeout(() => {
+          setVisible(false);
         }, 500);
       }
     } catch (err) {
@@ -93,6 +105,11 @@ export default function Signin() {
           <OrDivider />
           <OtherLogger title="Google" />
         </View>
+        <CustomModal
+          title="Email and Password doesnt match, Try again!"
+          isVisible={visible}
+          onClose={toggleClose}
+        />
       </ScrollView>
     </SafeAreaView>
   );

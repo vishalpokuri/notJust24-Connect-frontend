@@ -6,68 +6,72 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
+import { Svg, Path, G } from "react-native-svg";
 import { ScrollView } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Svg, Path } from "react-native-svg";
 import SocialView from "../../../components/profilePageComps/socials";
 import { TouchableOpacity } from "react-native";
 import CustomButton from "../../../components/ui/customButton";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { getItem } from "../../../utils/asyncStorage";
 import { BASE_API_URL } from "../../../constants/ngrokRoute";
+
 const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
   const cloudfrontUrl = "https://d1crt8jpz4phpk.cloudfront.net/";
-
-  useEffect(() => {
-    // Combined async function to handle both userId fetch and user data fetch
-    const fetchUserDataAndDetails = async () => {
-      try {
-        // First get userId
-        const id = await getItem("userId");
-        if (!id) {
-          console.error("No userId found");
-          return;
-        }
-
-        setUserId(id);
-
-        // Then fetch user details using the id
-        const response = await fetch(
-          `${BASE_API_URL}/api/userData/fetchData?userId=${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        const updatedPhotoKey = `${cloudfrontUrl}${data.userData.profilePhotoKey.replace(
-          "connectionsapp/",
-          ""
-        )}`;
-        data.userData.profilePhotoKey = updatedPhotoKey;
-
-        setUserData({
-          ...data.userData,
-        });
-      } catch (error) {
-        console.error("Error fetching data:", error);
+  const fetchUserDataAndDetails = async () => {
+    try {
+      // First get userId
+      const id = await getItem("userId");
+      if (!id) {
+        console.error("No userId found");
+        return;
       }
-    };
 
+      setUserId(id);
+
+      // Then fetch user details using the id
+      const response = await fetch(
+        `${BASE_API_URL}/api/userData/fetchData?userId=${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      const updatedPhotoKey = `${cloudfrontUrl}${data.userData.profilePhotoKey.replace(
+        "connectionsapp/",
+        ""
+      )}`;
+      data.userData.profilePhotoKey = updatedPhotoKey;
+
+      setUserData({
+        ...data.userData,
+      });
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
     fetchUserDataAndDetails();
   }, []); // Only run once on mount
 
+  //Fetch everytime on focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserDataAndDetails();
+    }, [])
+  );
   // Add loading state
   if (!userData) {
     return (
@@ -125,15 +129,44 @@ const ProfilePage = () => {
           <Text className="text-base text-[#bbb] my-2">
             {userData.description}
           </Text>
-          <CustomButton
-            title="Show Your Connections"
-            handlePress={() => {
-              router.push({
-                pathname: "/home/profile/yourConnections",
-                params: { userData: JSON.stringify(userData), userId: userId },
-              });
-            }}
-          />
+          <View className="flex-row justify-between">
+            <CustomButton
+              title="Show Your Connections"
+              handlePress={() => {
+                router.push({
+                  pathname: "/home/profile/yourConnections",
+                  params: {
+                    userData: JSON.stringify(userData),
+                    userId: userId,
+                  },
+                });
+              }}
+              containerStyles="w-[80%]"
+            />
+            <TouchableOpacity
+              title=""
+              className={`bg-[#444] px-4 my-4 h-[50px] justify-center items-center rounded-lg flex-row w-[15%] `}
+              onPress={() => {
+                router.push(`/home/profile/editScreen?userId=${userId}`);
+              }}
+            >
+              <Svg
+                fill="#fff"
+                width="24px"
+                height="24px"
+                viewBox="0 0 528.899 528.899"
+              >
+                <G>
+                  <Path
+                    d="M328.883,89.125l107.59,107.589l-272.34,272.34L56.604,361.465L328.883,89.125z M518.113,63.177l-47.981-47.981
+		c-18.543-18.543-48.653-18.543-67.259,0l-45.961,45.961l107.59,107.59l53.611-53.611
+		C532.495,100.753,532.495,77.559,518.113,63.177z M0.3,512.69c-1.958,8.812,5.998,16.708,14.811,14.565l119.891-29.069
+		L27.473,390.597L0.3,512.69z"
+                  />
+                </G>
+              </Svg>
+            </TouchableOpacity>
+          </View>
           <Text className="text-2xl mt-4 text-white">Your Socials</Text>
           <View className="mt-2 ">
             {userData.socialMediaData?.github && (

@@ -46,7 +46,7 @@ const AddProfilePhoto = () => {
       setSelectedImage({
         uri: asset.uri,
         name: asset.uri.split("/").pop(), // Extracting file name
-        type: asset.type || "image/jpeg", // Assuming JPEG if type is not provided
+        type: asset.type || "image", // Assuming JPEG if type is not provided
       });
     }
   };

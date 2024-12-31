@@ -149,7 +149,7 @@ const NotifModal = ({
                 className="bg-green-500"
                 onPress={onClose}
               >
-                <Text style={styles.closeButtonText}>Add</Text>
+                <Text style={styles.closeButtonText}>+</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -161,7 +161,7 @@ const NotifModal = ({
 
                 // TODO: the state function is to be set to ensure the setData sets the new array of notifs
               >
-                <Text style={styles.closeButtonText}>Ignore</Text>
+                <Text style={styles.closeButtonText}>-</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -46,6 +46,18 @@
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
           "recordAudioAndroid": true
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000",
+          "image": "./assets/appLogo/logo.png",
+          "dark": {
+            "image": "./assets/appLogo/logo.png",
+            "backgroundColor": "#000000"
+          },
+          "imageWidth": 200
+        }
       ]
     ],
     "experiments": {
