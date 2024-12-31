@@ -9,7 +9,7 @@ export default function RootLayout() {
     const checkAuth = async () => {
       const isValid = await checkToken();
       if (!isValid && !window.location.pathname.includes("/auth")) {
-        router.replace("/auth/login");
+        router.replace("/");
       }
     };
     checkAuth();
