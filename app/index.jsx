@@ -9,6 +9,7 @@ import React from "react";
 import { useEffect, useState, useCallback } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import WelcomeFlow from "../components/welcomeFlowComps/main";
+import * as Notifications from "expo-notifications";
 
 // Configure SplashScreen before any component rendering
 SplashScreen.preventAutoHideAsync();
@@ -23,8 +24,19 @@ export default function Index() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Register for Native Notify Push Notifications
         registerNNPushToken(25674, "6Kka30YI9fQ1rmbvtyUDkX");
+
+        // Set system background color
         await SystemUI.setBackgroundColorAsync("#000000");
+
+        // Request Notification permissions
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== "granted") {
+          console.warn("Notification permissions not granted!");
+        }
+
+        // Simulate delay for splash screen
         await new Promise((resolve) => setTimeout(resolve, 1500));
       } catch (e) {
         console.warn("Error preparing app:", e);

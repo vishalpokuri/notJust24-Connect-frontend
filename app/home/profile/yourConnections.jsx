@@ -32,6 +32,7 @@ const YourConnections = () => {
 
   const params = useLocalSearchParams();
   const userData = params.userData ? JSON.parse(params.userData) : [];
+  //id of the user
   const userId = params.userId;
   const lists = userData.lists;
   const cloudfrontUrl = "https://d1crt8jpz4phpk.cloudfront.net/";

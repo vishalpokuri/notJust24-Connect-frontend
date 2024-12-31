@@ -16,9 +16,10 @@ import {
 import { getItem } from "../../../utils/asyncStorage";
 import NotificationItem from "../../../components/ui/notification";
 
-export default function datacreen() {
+export default function NotificationScreen() {
   const [data, setData] = useState([]);
   const [userId, setUserId] = useState(null);
+  const cdn = "https://d1crt8jpz4phpk.cloudfront.net";
 
   // Fetch userId on mount
   useEffect(() => {
@@ -61,13 +62,21 @@ export default function datacreen() {
   // Render each notification item
   const renderItem = ({ item }) => {
     const pushedData = JSON.parse(item.pushData);
+    
+    const newSelfieUri = `${cdn}/${pushedData.selfieKey}`;
 
+    const notificationModalReq = {
+      ...pushedData,
+    };
+
+    const newProfileUri = `${cdn}/${pushedData.profilePhotoKey}`;
     return (
       <NotificationItem
         setData={setData}
+        notificationModalReq={notificationModalReq}
         notificationId={item.notification_id}
-        selfieUri={pushedData.selfieUri}
-        profileUri={pushedData.profileUri}
+        selfieUri={newSelfieUri}
+        profileUri={newProfileUri}
         title={item.title}
         message={item.message}
       />

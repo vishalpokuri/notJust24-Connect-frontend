@@ -43,7 +43,7 @@ export default function Signin() {
         setVisible(true);
         setTimeout(() => {
           setVisible(false);
-        }, 500);
+        }, 1600);
       }
     } catch (err) {
       console.error("Error logging in: ", err);
@@ -53,7 +53,7 @@ export default function Signin() {
   };
 
   return (
-    <SafeAreaView className="bg-[#0a0a0a] h-full">
+    <SafeAreaView className="bg-[#000000] h-full">
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ height: "100%" }}
@@ -106,6 +106,7 @@ export default function Signin() {
           <OtherLogger title="Google" />
         </View>
         <CustomModal
+          animSource="fail"
           title="Email and Password doesnt match, Try again!"
           isVisible={visible}
           onClose={toggleClose}

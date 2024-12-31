@@ -71,7 +71,7 @@ const AddNotes = ({ height, width, uri, setImage }) => {
             },
           }
         );
-
+        //Gets selfieKey
         const data = await response.json();
 
         if (data.presignedUrl) {
@@ -85,7 +85,7 @@ const AddNotes = ({ height, width, uri, setImage }) => {
 
           if (uploadResponse.status === 200) {
             //2. Create a connection and put the selfie key
-            const userId = await getItem("userId");
+            const selfieKey = data.key;
             const keyUploadResponse = await fetch(
               `${BASE_API_URL}/api/QR/uploadSelfieConnection`,
               {
@@ -96,17 +96,22 @@ const AddNotes = ({ height, width, uri, setImage }) => {
                 body: JSON.stringify({
                   userId1: userId,
                   userId2: userId2,
-                  selfieKey: data.key,
+                  selfieKey,
                 }),
               }
             );
             const data2 = await keyUploadResponse.json();
+           
             //3. Put that in Connection
             if (keyUploadResponse.ok) {
               //3. Create a notes Object with the connectionId and UserId
-              createNotes(data2.connectionId, userId, notes);
+              if (notes) {
+                createNotes(data2.connectionId, userId, notes);
+              }
               //4. Put that in Connection
               uploadInList(listId, data2.connectionId, setVisible);
+              //5. Notify the other person
+              notifyUser(userId, userId2, selfieKey, data2.connectionId);
             } else {
               console.error("Error saving file key to backend.");
             }
@@ -137,7 +142,7 @@ const AddNotes = ({ height, width, uri, setImage }) => {
         setIsLoading(false);
         setIsSuccess(true);
       } else {
-        console.log(data);
+        
         setVisible(true);
       }
     } catch (error) {
@@ -166,6 +171,56 @@ const AddNotes = ({ height, width, uri, setImage }) => {
       }
     } catch (error) {
       console.log(error);
+    }
+  };
+  const notifyUser = async (startId, endId, selfieKey, connectionId) => {
+    //Start: Connection Initiator
+    //End: Notification receiver
+    // Needed, selfie URI, PrrofileUri, Data: {name, companyName}
+    //Sending connection Id, so that you can get selfieURI and ProfileURI simultaneously
+    try {
+      const response = await fetch(
+        `${BASE_API_URL}/api/userData/fetchLimitedData?userId=${startId}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      const userfetchedData = await response.json();
+      if (userfetchedData) {
+        try {
+          const response2 = await fetch(
+            "https://app.nativenotify.com/api/indie/notification",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                subID: endId,
+                appId: 25674,
+                appToken: "6Kka30YI9fQ1rmbvtyUDkX",
+                title: `Say Hi to ${userfetchedData.name} 👋`,
+                message: `You've met ${userfetchedData.name} today. Added to your second brain`,
+                pushData: JSON.stringify({
+                  ...userfetchedData,
+                  connectionId,
+                  selfieKey,
+                }),
+              }),
+            }
+          );
+
+          if (response2.ok) {
+            console.log("Sent notification successfully");
+          }
+        } catch (e) {
+          console.log("Error at block2: ", e);
+        }
+      }
+      // Fix: Properly structure the second fetch request
+    } catch (e) {
+      console.log("Error at block1: ", e);
     }
   };
 

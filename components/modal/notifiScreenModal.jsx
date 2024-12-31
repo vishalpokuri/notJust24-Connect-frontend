@@ -11,16 +11,17 @@ import {
 import { getItem } from "../../utils/asyncStorage";
 import { deleteIndieNotificationInbox } from "native-notify";
 import { BlurView } from "expo-blur";
-
+import { router } from "expo-router";
 const NotifModal = ({
   selfieUri,
   isVisible,
   onClose,
   profileUri,
   notificationId,
+  notificationModalReq,
   setData,
 }) => {
-  console.log(notificationId);
+  
   const [imageLoaded, setImageLoaded] = useState(false);
   const [userId, setUserId] = useState(false);
   const fadeAnim = new Animated.Value(0);
@@ -32,7 +33,7 @@ const NotifModal = ({
         25674,
         "6Kka30YI9fQ1rmbvtyUDkX"
       );
-      console.log("notifications: ", notifications);
+    
       setData(notifications);
     } catch (error) {
       console.error("Error deleting notification: ", error);
@@ -139,15 +140,24 @@ const NotifModal = ({
               </View>
 
               <View style={styles.profileInfo}>
-                <Text style={styles.name}>Person Name</Text>
-                <Text style={styles.company}>Company Name</Text>
+                <Text style={styles.name}>{notificationModalReq.name}</Text>
+                <Text style={styles.company}>
+                  {notificationModalReq.workplace}
+                </Text>
               </View>
             </View>
             <View className="flex-row w-[75%] justify-around">
               <TouchableOpacity
                 style={styles.closeButton}
                 className="bg-green-500"
-                onPress={onClose}
+                //TODO: Pass connectionId here while routing
+                onPress={() => {
+                  
+                  router.push(
+                    `/home/addNotesfromNotif?connectionId=${notificationModalReq.connectionId}&uri=${selfieUri}`
+                  );
+                  onClose();
+                }}
               >
                 <Text style={styles.closeButtonText}>+</Text>
               </TouchableOpacity>

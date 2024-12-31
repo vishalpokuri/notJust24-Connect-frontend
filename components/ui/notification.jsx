@@ -6,6 +6,7 @@ import NotifModal from "../modal/notifiScreenModal";
 export default function NotificationItem({
   selfieUri,
   profileUri,
+  notificationModalReq,
   title,
   notificationId,
   message,
@@ -42,6 +43,7 @@ export default function NotificationItem({
       {/* Modal */}
       <NotifModal
         setData={setData}
+        notificationModalReq={notificationModalReq}
         notificationId={notificationId}
         isVisible={isModalVisible}
         onClose={toggleModal} // Pass the toggle function to close the modal

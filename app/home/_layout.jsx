@@ -10,6 +10,10 @@ const AuthLayout = () => {
         <Stack.Screen name="scanCamera" options={{ headerShown: false }} />
         <Stack.Screen name="takeSelfie" options={{ headerShown: false }} />
         <Stack.Screen name="addNotes" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="addNotesfromNotif"
+          options={{ headerShown: false }}
+        />
       </Stack>
       <StatusBar backgroundColor="#000000" style="light" />
     </>

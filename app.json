@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Connect-jsm",
-    "slug": "Connect-jsm",
+    "name": "Connect",
+    "slug": "Connect",
     "scheme": "connect",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,17 +10,19 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-
+    "icon": "./assets/appLogo/logo.png",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#000000"
       },
       "package": "com.vishal.connections",
       "permissions": [
         "android.permission.CAMERA",
+        "android.permission.NOTIFICATION",
+        "android.permission.VIBRATE",
         "android.permission.RECORD_AUDIO"
       ]
     },
@@ -42,9 +44,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera"
         }
       ],
       [
@@ -68,7 +68,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "063827b5-c53a-421f-a629-cbf629673d46"
+        "projectId": "1ffc7187-f2f6-4a19-af66-315e462c66e5"
       }
     },
     "newArchEnabled": true,

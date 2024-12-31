@@ -13,10 +13,20 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 
-const CustomModal = ({ isVisible, onClose, isLoading, title, description }) => {
+const CustomModal = ({
+  isVisible,
+  onClose,
+  isLoading,
+  title,
+  description,
+  animSource,
+}) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const successAnimation = useRef(null);
 
+  const animLinks = {
+    fail: require("../../assets/lottieAnimations/fail.json"),
+  };
   useEffect(() => {
     if (isVisible) {
       Animated.timing(fadeAnim, {
@@ -26,17 +36,6 @@ const CustomModal = ({ isVisible, onClose, isLoading, title, description }) => {
       }).start();
     }
   }, [isVisible]);
-
-  const handleClose = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      onClose();
-      router.replace("/home/homePage");
-    });
-  };
 
   return (
     <Modal
@@ -57,17 +56,17 @@ const CustomModal = ({ isVisible, onClose, isLoading, title, description }) => {
               </>
             ) : (
               <>
-                <Text className="text-xl mb-4 text-white font-bold">
+                <Text className="text-xl mb-4 text-white font-bold text-center">
                   {title}
                 </Text>
                 <View style={styles.animationContainer}>
-                  {/* <LottieView
+                  <LottieView
                     ref={successAnimation}
-                    source={require("../../assets/lottieAnimations/SuccessAnimation.json")}
+                    source={animLinks[animSource]}
                     style={styles.lottieAnimation}
-                    loop={false}
+                    loop
                     autoPlay
-                  /> */}
+                  />
                 </View>
                 <Text className="text-base mb-4 text-white font-bold">
                   {description}
