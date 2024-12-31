@@ -90,6 +90,7 @@ const AddProfilePhoto = () => {
                 },
                 body: JSON.stringify({
                   key: data.key,
+                  ...form,
                   email,
                 }),
               }

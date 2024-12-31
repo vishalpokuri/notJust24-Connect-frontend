@@ -136,16 +136,27 @@ const ProfilePage = () => {
           />
           <Text className="text-2xl mt-4 text-white">Your Socials</Text>
           <View className="mt-2 ">
-            <SocialView icon="github" text={userData.socialMediaData?.github} />
-            <SocialView
-              icon="linkedin"
-              text={userData.socialMediaData?.linkedin}
-            />
-            <SocialView
-              icon="telegram"
-              text={userData.socialMediaData?.telegram}
-            />
-            <SocialView icon="x" text={userData.socialMediaData?.x} />
+            {userData.socialMediaData?.github && (
+              <SocialView
+                icon="github"
+                text={userData.socialMediaData.github}
+              />
+            )}
+            {userData.socialMediaData?.linkedin && (
+              <SocialView
+                icon="linkedin"
+                text={userData.socialMediaData.linkedin}
+              />
+            )}
+            {userData.socialMediaData?.telegram && (
+              <SocialView
+                icon="telegram"
+                text={userData.socialMediaData.telegram}
+              />
+            )}
+            {userData.socialMediaData?.x && (
+              <SocialView icon="x" text={userData.socialMediaData.x} />
+            )}
           </View>
         </View>
       </ScrollView>

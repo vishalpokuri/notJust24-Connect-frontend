@@ -26,10 +26,10 @@ export default function Signin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       if (response.ok) {
         setTimeout(() => {
-          router.push("./signup/otp");
+          router.push(`./otp?otpToken=${data.otpToken}`);
+
           setIsSubmitting(false);
         }, 500);
       }
@@ -92,7 +92,6 @@ export default function Signin() {
           {/* Or section, login with google and Login with Solana */}
           <OrDivider />
           <OtherLogger title="Google" />
-          <OtherLogger title="Solana" />
         </View>
       </ScrollView>
     </SafeAreaView>

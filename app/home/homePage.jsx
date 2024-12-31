@@ -65,7 +65,7 @@ const HomePage = () => {
         </View>
       </ScrollView>
 
-      <StatusBar backgroundColor="#0a0a0a" barStyle="light-content" />
+      <StatusBar backgroundColor="#000000" barStyle="light-content" />
     </SafeAreaView>
   );
 };

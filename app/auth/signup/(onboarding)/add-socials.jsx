@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import IconFormField from "../../../../components/ui/iconFormField";
 import { BASE_API_URL } from "../../../../constants/ngrokRoute";
 import { getItem } from "../../../../utils/asyncStorage";
+
 const AddSocials = () => {
   const [socialsValue, setSocialsValue] = useState({
     telegram: "",
@@ -16,36 +17,38 @@ const AddSocials = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const normalizeSocialUrl = (platform, username) => {
+    if (!username) return "";
+
+    const platforms = {
+      github: "https://github.com/",
+      x: "https://x.com/",
+      telegram: "https://t.me/",
+      linkedin: "https://linkedin.com/in/",
+    };
+
+    if (username.startsWith("http")) return username.trim(); // Return if already a URL
+    return `${platforms[platform]}${username.trim()}`;
+  };
+
   const submit = async () => {
     setIsSubmitting(true);
-    //Handling urls for inputs
-    //Check if any of the inputs are not in the url method
-    const normalizedGitHubUrl = normalizeSocialUrl(
-      "github",
-      socialsValue.github
-    );
-    const normalizedXUrl = normalizeSocialUrl("x", socialsValue.x);
-    const normalizedTelegramUrl = normalizeSocialUrl(
-      "telegram",
-      socialsValue.telegram
-    );
-    const normalizedLinkedInUrl = normalizeSocialUrl(
-      "linkedin",
-      socialsValue.linkedin
-    );
-    setSocialsValue({
-      github: normalizedGitHubUrl,
-      linkedin: normalizedLinkedInUrl,
-      x: normalizedXUrl,
-      telegram: normalizedTelegramUrl,
-    });
-    const email = await getItem("email");
 
     try {
+      const email = await getItem("email");
+
+      // Normalize all social media URLs
+      const normalizedSocials = {
+        github: normalizeSocialUrl("github", socialsValue.github),
+        linkedin: normalizeSocialUrl("linkedin", socialsValue.linkedin),
+        x: normalizeSocialUrl("x", socialsValue.x),
+        telegram: normalizeSocialUrl("telegram", socialsValue.telegram),
+      };
+
       const response = await fetch(`${BASE_API_URL}/api/userData/addSocials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...socialsValue, email }),
+        body: JSON.stringify({ ...normalizedSocials, email }),
       });
 
       const data = await response.json();
@@ -54,8 +57,9 @@ const AddSocials = () => {
       } else {
         alert(data.message);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while submitting. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -74,50 +78,36 @@ const AddSocials = () => {
           <IconFormField
             title="Telegram"
             value={socialsValue.telegram}
-            placeholder="x.com/......."
+            placeholder=""
             icon="telegram"
-            handleChangeText={(e) => {
-              setSocialsValue({
-                ...socialsValue,
-                telegram: e,
-              });
-            }}
+            handleChangeText={(e) =>
+              setSocialsValue({ ...socialsValue, telegram: e })
+            }
           />
           <IconFormField
-            title="Linkedin"
+            title="LinkedIn"
             value={socialsValue.linkedin}
-            placeholder="x.com/......."
+            placeholder=""
             icon="linkedin"
-            handleChangeText={(e) => {
-              setSocialsValue({
-                ...socialsValue,
-                linkedin: e,
-              });
-            }}
+            handleChangeText={(e) =>
+              setSocialsValue({ ...socialsValue, linkedin: e })
+            }
           />
           <IconFormField
-            title="Github"
+            title="GitHub"
             value={socialsValue.github}
-            placeholder="x.com/......."
+            placeholder=""
             icon="github"
-            handleChangeText={(e) => {
-              setSocialsValue({
-                ...socialsValue,
-                github: e,
-              });
-            }}
+            handleChangeText={(e) =>
+              setSocialsValue({ ...socialsValue, github: e })
+            }
           />
           <IconFormField
-            title="x"
+            title="X"
             value={socialsValue.x}
-            placeholder="x.com/......."
+            placeholder=""
             icon="x"
-            handleChangeText={(e) => {
-              setSocialsValue({
-                ...socialsValue,
-                x: e,
-              });
-            }}
+            handleChangeText={(e) => setSocialsValue({ ...socialsValue, x: e })}
           />
           <CustomButton
             title="Continue"
@@ -131,27 +121,3 @@ const AddSocials = () => {
 };
 
 export default AddSocials;
-
-function normalizeSocialUrl(platform, username) {
-  if (!username) {
-    return "";
-  }
-  const platforms = {
-    github: "https://github.com/",
-    x: "https://x.com/", // Use https://x.com for X (formerly Twitter)
-    telegram: "https://t.me/",
-    linkedin: "https://linkedin.com/in/",
-  };
-
-  if (username.includes("https")) {
-    return username;
-  }
-
-  if (platforms[platform]) {
-    return username.includes(platform)
-      ? `https://${username}`
-      : `${platforms[platform]}${username}`;
-  } else {
-    return username;
-  }
-}

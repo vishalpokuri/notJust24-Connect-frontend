@@ -2,60 +2,67 @@ import { View, Text } from "react-native";
 import React, { useState } from "react";
 import FormField from "../../../../components/ui/formField";
 import { ScrollView } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../../../../components/ui/customButton";
 import { BASE_API_URL } from "../../../../constants/ngrokRoute";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import OTPResend from "../../../../components/ui/OTPresend";
 import { getItem, setItem } from "../../../../utils/asyncStorage";
-
-import { registerIndieID, unregisterIndieDevice } from "native-notify";
-import axios from "axios";
+import { registerIndieID } from "native-notify";
 
 const Otp = () => {
   const [otpValue, setOtpValue] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const params = useLocalSearchParams();
+  const otpToken = params.otpToken;
+
+  const handleNavigation = (level, userId) => {
+    switch (level) {
+      case 1:
+        router.push("./create-username");
+        break;
+      case 2:
+        router.push("./add-socials");
+        break;
+      case 3:
+        router.push("./add-profile-photo");
+        break;
+      case 4:
+        router.replace(`/home/homePage?userId=${userId}`);
+        break;
+      default:
+        console.warn("Unknown onboarding level:", level);
+    }
+  };
 
   const submit = async () => {
+    if (isSubmitting || !otpValue) return;
+
     setIsSubmitting(true);
-    const email = await getItem("email");
+
     try {
+      const email = await getItem("email");
       const response = await fetch(`${BASE_API_URL}/api/auth/verifyotp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ otp: otpValue, email }),
+        body: JSON.stringify({ otp: otpValue, otpToken }),
       });
+
       const data = await response.json();
-
-      if (response.ok) {
-        registerIndieID(data.userId, 25674, "6Kka30YI9fQ1rmbvtyUDkX");
-        await setItem("userId", data.userId);
-        await setItem("accessToken", data.accessToken);
-      } else {
-        alert(data.message);
+      if (!response.ok) {
+        throw new Error(data.message || "Verification failed");
       }
-      //Check for onboardingLevel
 
-      if (response.ok && data.level == 1) {
-        setTimeout(() => {
-          router.push("./create-username");
-        });
-      } else if (response.ok && data.level == 2) {
-        setTimeout(() => {
-          router.push("./add-socials");
-        });
-      } else if (response.ok && data.level == 3) {
-        setTimeout(() => {
-          router.push("./add-profile-photo");
-        });
-      } else if (response.ok && data.level == 4) {
-        setTimeout(() => {
-          router.replace(`/home/homePage?userId=${data.userId}`);
-        });
-      }
-    } catch (e) {
-      console.error("Error submitting OTP: ", e);
+      await Promise.all([
+        registerIndieID(data.userId, 25674, "6Kka30YI9fQ1rmbvtyUDkX"),
+        setItem("userId", data.userId),
+        setItem("accessToken", data.accessToken),
+      ]);
+
+      handleNavigation(data.level, data.userId);
+    } catch (error) {
+      alert(error.message || "An error occurred during verification");
+      console.error("Error submitting OTP: ", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -63,23 +70,25 @@ const Otp = () => {
 
   const resend = async () => {
     try {
-      const response = await fetch(
-        "https://376e-36-255-16-55.ngrok-free.app/api/auth/resendotp",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const response = await fetch(`${BASE_API_URL}/api/auth/resendotp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ otpToken }),
+      });
+
       const data = await response.json();
+
       if (!response.ok) {
-        alert(data.message);
-      } else {
-        console.log("Response: ", response.ok, "otp working");
+        throw new Error(data.message || "Failed to resend OTP");
       }
-    } catch (e) {
-      console.error(e);
+
+      alert("OTP resent successfully");
+    } catch (error) {
+      alert(error.message || "Failed to resend OTP");
+      console.error("Error resending OTP:", error);
     }
   };
+
   return (
     <SafeAreaView className="bg-[#0a0a0a] h-full">
       <ScrollView
@@ -93,17 +102,17 @@ const Otp = () => {
           <FormField
             title="OTP"
             value={otpValue}
-            handleChangeText={(e) => {
-              setOtpValue(e);
-            }}
+            handleChangeText={setOtpValue}
             placeholder=""
             otherStyles="mt-4"
             keyboardType="number-pad"
+            editable={!isSubmitting}
           />
           <CustomButton
             title="Continue"
             handlePress={submit}
             isLoading={isSubmitting}
+            disabled={isSubmitting || !otpValue}
           />
           <OTPResend onResend={resend} />
         </View>

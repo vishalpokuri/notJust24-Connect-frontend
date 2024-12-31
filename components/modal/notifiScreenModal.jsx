@@ -20,10 +20,10 @@ const NotifModal = ({
   notificationId,
   setData,
 }) => {
+  console.log(notificationId);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [userId, setUserId] = useState(false);
   const fadeAnim = new Animated.Value(0);
-
   const handleDeleteNotification = async (notificationId) => {
     try {
       let notifications = await deleteIndieNotificationInbox(

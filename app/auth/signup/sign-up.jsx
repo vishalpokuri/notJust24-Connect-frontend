@@ -28,10 +28,10 @@ const Signup = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
+      const data = await response.json();
       if (response.ok) {
         setTimeout(() => {
-          router.push("./otp");
+          router.push(`./otp?otpToken=${data.otpToken}`);
         }, 500);
         setIsSubmitting(false);
       }
@@ -54,7 +54,7 @@ const Signup = () => {
             Get your free Account
           </Text>
           <OtherLogger title="Google" />
-          <OtherLogger title="Solana" />
+
           <OrDivider />
           <FormField
             title="Work Email"
