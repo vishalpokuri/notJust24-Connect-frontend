@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwt from "jsonwebtoken";
+import jwtDecode from "jwt-decode";
 
 export const storeToken = async (token) => {
   await AsyncStorage.setItem("jwt", token);
@@ -10,7 +10,7 @@ export const checkToken = async () => {
   if (!token) return false;
 
   try {
-    const decoded = jwt.decode(token);
+    const decoded = jwtDecode(token);
     return decoded.exp > Date.now() / 1000;
   } catch {
     return false;
