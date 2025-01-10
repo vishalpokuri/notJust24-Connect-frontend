@@ -10,11 +10,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
-    "icon": "./assets/appLogo/logo.png",
+    "icon": "./assets/appLogo/appLogo.png",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#000000"
       },
