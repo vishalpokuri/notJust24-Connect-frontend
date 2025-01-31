@@ -7,7 +7,7 @@ import CustomButton from "../../../../components/ui/customButton";
 import { BASE_API_URL } from "../../../../constants/ngrokRoute";
 import { router, useLocalSearchParams } from "expo-router";
 import OTPResend from "../../../../components/ui/OTPresend";
-import { getItem, setItem } from "../../../../utils/asyncStorage";
+import { setItem } from "../../../../utils/asyncStorage";
 import { registerIndieID } from "native-notify";
 
 const Otp = () => {
@@ -41,7 +41,6 @@ const Otp = () => {
     setIsSubmitting(true);
 
     try {
-      const email = await getItem("email");
       const response = await fetch(`${BASE_API_URL}/api/auth/verifyotp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

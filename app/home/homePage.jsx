@@ -1,5 +1,5 @@
 // HomePage.js
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Svg, Path, Circle } from "react-native-svg";
 import {
   ScrollView,
@@ -8,18 +8,48 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import axios from "axios";
+import { BASE_API_URL } from "../../constants/ngrokRoute";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ToggleButton from "../../components/homePageComps/toggleButton";
 import Qr from "../../components/homePageComps/Qr";
 import Nfc from "../../components/homePageComps/Nfc";
 import HomePageHeader from "../../components/homePageComps/header";
-
-import NotifModal from "../../components/modal/notifiScreenModal";
+import { getItem, setItem } from "../../utils/asyncStorage";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomePage = () => {
   const [isQRmode, setIsQRmode] = useState(true);
+  const [pfpURI, setpfpURI] = useState(null);
   const router = useRouter(); // Use the hook here
+  const cloudfrontUrl = "https://d1crt8jpz4phpk.cloudfront.net/";
+  //Consider fetching the whole data and putting in the async storage here.
+  useFocusEffect(
+    useCallback(() => {
+      const getDetails = async () => {
+        try {
+          const id = await getItem("userId");
+          const response = await axios.get(
+            `${BASE_API_URL}/api/userData/fetchData?userId=${id}`
+          );
+          //setting up the uri of the pfp constantly for unnecessary replacements
+          const userData = response.data.userData;
+          const updatedPhotoKey = `${cloudfrontUrl}${userData.profilePhotoKey.replace(
+            "connectionsapp/",
+            ""
+          )}`;
+          userData.profilePhotoKey = updatedPhotoKey;
+          await setItem("userData", userData);
+
+          setpfpURI(userData.profilePhotoKey);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      getDetails();
+    })
+  );
 
   const handleToggle = () => {
     setIsQRmode((previous) => !previous);
@@ -29,7 +59,7 @@ const HomePage = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.contentWrapper}>
-          <HomePageHeader />
+          <HomePageHeader pfpURI={pfpURI} />
           <View style={styles.spacer} />
           {isQRmode ? <Qr /> : <Nfc />}
           <ToggleButton onToggle={handleToggle} />
@@ -66,7 +96,7 @@ const HomePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#000",
   },
   scrollContainer: {
     minHeight: "100%",

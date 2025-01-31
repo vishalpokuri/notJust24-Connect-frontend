@@ -40,7 +40,7 @@ const OnboardingComplete = ({ username }) => {
 
         <TouchableOpacity
           onPress={handleContinue}
-          className="bg-[#a0f963] px-6 py-3 rounded-full"
+          className="bg-[#9CCC65] px-6 py-3 rounded-full"
         >
           <Text className="text-lg text-[#0a0a0a] font-bold">Lessgoo!!</Text>
         </TouchableOpacity>

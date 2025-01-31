@@ -1,11 +1,9 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
 import { TouchableOpacity } from "react-native";
-import { useState } from "react";
 import { Svg, Path } from "react-native-svg";
 import { router } from "expo-router";
-const HomePageHeader = () => {
-  const [image, setImage] = useState("");
+const HomePageHeader = ({ pfpURI }) => {
   return (
     <View className="w-full flex-row items-center justify-between">
       <Text className="font-bold  text-3xl text-white">Homepage</Text>
@@ -62,9 +60,9 @@ const HomePageHeader = () => {
             router.push("./profile/profilePage");
           }}
         >
-          {image ? (
+          {pfpURI ? (
             <Image
-              source={{ uri: image }}
+              source={{ uri: pfpURI }}
               className="w-full h-full rounded-full"
               resizeMode="cover"
             />

@@ -111,9 +111,9 @@ const styles = StyleSheet.create({
   slider: {
     position: "absolute",
     width: "40%",
-    height: "80%",
-    backgroundColor: "#b0f963",
-    borderRadius: 15,
+    height: "85%",
+    backgroundColor: "#9CCC65",
+    borderRadius: 14,
     zIndex: 0,
     elevation: 3,
     shadowColor: "#000",

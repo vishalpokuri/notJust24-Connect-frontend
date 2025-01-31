@@ -39,33 +39,12 @@ const EditScreen = () => {
     },
   });
 
-  const params = useLocalSearchParams();
-  const userId = params.userId;
-  const cloudfrontUrl = "https://d1crt8jpz4phpk.cloudfront.net/";
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(
-          `${BASE_API_URL}/api/userData/fetchData?userId=${userId}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const data = await getItem("userData");
+        const fullPhotoUrl = data.profilePhotoKey;
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const photoKey = data.userData.profilePhotoKey;
-        const fullPhotoUrl = `${cloudfrontUrl}${photoKey.replace(
-          "connectionsapp/",
-          ""
-        )}`;
         setSelectedImage({
           uri: fullPhotoUrl,
           name: fullPhotoUrl.split("/").pop(), // Extracting file name
@@ -73,15 +52,15 @@ const EditScreen = () => {
         });
 
         setFormData({
-          name: data.userData.name,
-          username: data.userData.username,
-          workplace: data.userData.workplace,
-          description: data.userData.description,
+          name: data.name,
+          username: data.username,
+          workplace: data.workplace,
+          description: data.description,
           socialMediaData: {
-            github: data.userData.socialMediaData?.github || "",
-            linkedin: data.userData.socialMediaData?.linkedin || "",
-            telegram: data.userData.socialMediaData?.telegram || "",
-            x: data.userData.socialMediaData?.x || "",
+            github: data.socialMediaData?.github || "",
+            linkedin: data.socialMediaData?.linkedin || "",
+            telegram: data.socialMediaData?.telegram || "",
+            x: data.socialMediaData?.x || "",
           },
         });
       } catch (error) {
@@ -91,7 +70,7 @@ const EditScreen = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, []);
 
   const pickImage = async () => {
     try {
@@ -215,9 +194,9 @@ const EditScreen = () => {
           disabled={isLoading}
         >
           {isLoading ? (
-            <ActivityIndicator color="white" size="small" />
+            <ActivityIndicator color="black" size="small" />
           ) : (
-            <Text style={styles.saveButtonText}>✅</Text>
+            <Text style={styles.saveButtonText}>Save</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -324,7 +303,7 @@ const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#000",
   },
   header: {
     flexDirection: "row",
@@ -347,7 +326,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButtonText: {
-    color: "white",
+    color: "black",
     fontSize: 16,
     fontWeight: "600",
   },

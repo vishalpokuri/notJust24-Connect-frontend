@@ -15,12 +15,10 @@ import { TouchableOpacity } from "react-native";
 import CustomButton from "../../../components/ui/customButton";
 import { router, useFocusEffect } from "expo-router";
 import { getItem } from "../../../utils/asyncStorage";
-import { BASE_API_URL } from "../../../constants/ngrokRoute";
 
 const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState(null);
-  const cloudfrontUrl = "https://d1crt8jpz4phpk.cloudfront.net/";
   const fetchUserDataAndDetails = async () => {
     try {
       // First get userId
@@ -29,43 +27,16 @@ const ProfilePage = () => {
         console.error("No userId found");
         return;
       }
-
       setUserId(id);
-
-      // Then fetch user details using the id
-      const response = await fetch(
-        `${BASE_API_URL}/api/userData/fetchData?userId=${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      const updatedPhotoKey = `${cloudfrontUrl}${data.userData.profilePhotoKey.replace(
-        "connectionsapp/",
-        ""
-      )}`;
-      data.userData.profilePhotoKey = updatedPhotoKey;
-
+      // Then fetch user details
+      const data = await getItem("userData");
       setUserData({
-        ...data.userData,
+        ...data,
       });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
-  useEffect(() => {
-    fetchUserDataAndDetails();
-  }, []); // Only run once on mount
-
   //Fetch everytime on focus
   useFocusEffect(
     useCallback(() => {
@@ -130,6 +101,7 @@ const ProfilePage = () => {
             {userData.description}
           </Text>
           <View className="flex-row justify-between">
+            {/* TODO: check this userData, because of the asyncstorage saving */}
             <CustomButton
               title="Show Your Connections"
               handlePress={() => {
